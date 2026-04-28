@@ -1,0 +1,11 @@
+Intercept Requests (before/after)
+🔹 Role:
+
+Functions that run before reaching your controller
+
+👉 Used for:
+
+*Authentication if the user not autherized -> status(401) Unauthorized*
+Validation
+Logging
+Error handling
