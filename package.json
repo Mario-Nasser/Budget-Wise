@@ -1,0 +1,9 @@
+{
+  "name": "budget-wise-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node backEnd/app.js",
+    "backend:start": "node backEnd/app.js"
+  }
+}
