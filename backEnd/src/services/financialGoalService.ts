@@ -1,4 +1,4 @@
-import { FinancialGoal } from '../classes/financialGoal';
+import { FinancialGoal, GoalData } from '../classes/financialGoal';
 import FinancialGoalModel from '../models/financialGoalModel';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -14,7 +14,7 @@ class FinancialGoalService {
   }
 
   static async getGoal(goalId: string) {
-    const data = await FinancialGoalModel.findOne({ goalId });
+    const data: GoalData | null = await FinancialGoalModel.findOne({ goalId });
 
     if (!data) throw new Error("Goal not found");
 
@@ -23,7 +23,7 @@ class FinancialGoalService {
   }
 
   static async updateProgress(goalId: string, amount: number) {
-    const data = await FinancialGoalModel.findOne({ goalId });
+    const data: GoalData | null = await FinancialGoalModel.findOne({ goalId });
 
     if (!data) throw new Error("Goal not found");
 
@@ -39,9 +39,11 @@ class FinancialGoalService {
   }
 
   static async getAllGoals() {
-    const goals = await FinancialGoalModel.find();
+    const goals: GoalData[] | null = await FinancialGoalModel.find();
 
-    return goals.map(g => {
+    if (!goals) throw new Error("No goals found");
+
+    return goals.map((g: GoalData) => {
       const goal = new FinancialGoal(g);
       return goal.getFullDetails();
     });

@@ -1,47 +1,59 @@
-interface GoalData {
+export interface GoalData {
   goalId: string;
   goalName: string;
   targetAmount: number;
-  currentAmount?: number;
+  currentAmount: number;
   deadline: Date | string;
 }
 
 export class FinancialGoal {
-  #goalId: string;
-  #goalName: string;
-  #targetAmount: number;
-  #currentAmount: number;
-  #deadline: Date;
+  private goalData: GoalData;
 
-  constructor({ goalId, goalName, targetAmount, currentAmount = 0, deadline }: GoalData) {
-    this.#goalId = goalId;
-    this.#goalName = goalName;
-    this.#targetAmount = targetAmount;
-    this.#currentAmount = currentAmount;
-    this.#deadline = new Date(deadline);
+  constructor(data: GoalData) {
+    this.goalData = data;
+  }
+
+  get goalId() {
+    return this.goalData.goalId;
+  }
+
+  get goalName() {
+    return this.goalData.goalName;
+  }
+
+  get targetAmount() {
+    return this.goalData.targetAmount;
+  }
+
+  get currentAmount() {
+    return this.goalData.currentAmount;
+  }
+
+  get deadline() {
+    return this.goalData.deadline;
   }
 
   updateProgress(amount: number) {
     if (amount <= 0) throw new Error("Amount must be positive");
-    this.#currentAmount += amount;
+    this.goalData.currentAmount += amount;
   }
 
   calculateProgress(): number {
-    if (this.#targetAmount === 0) return 0;
-    return (this.#currentAmount / this.#targetAmount) * 100;
+    if (this.targetAmount === 0) return 0;
+    return (this.currentAmount / this.targetAmount) * 100;
   }
 
   isAchieved(): boolean {
-    return this.#currentAmount >= this.#targetAmount;
+    return this.currentAmount >= this.targetAmount;
   }
 
   getData() {
     return {
-      goalId: this.#goalId,
-      goalName: this.#goalName,
-      targetAmount: this.#targetAmount,
-      currentAmount: this.#currentAmount,
-      deadline: this.#deadline
+      goalId: this.goalId,
+      goalName: this.goalName,
+      targetAmount: this.targetAmount,
+      currentAmount: this.currentAmount,
+      deadline: this.deadline,
     };
   }
 
@@ -49,9 +61,7 @@ export class FinancialGoal {
     return {
       ...this.getData(),
       progress: this.calculateProgress(),
-      isAchieved: this.isAchieved()
+      isAchieved: this.isAchieved(),
     };
   }
 }
-
-// export default FinancialGoal;
