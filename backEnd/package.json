@@ -1,0 +1,45 @@
+{
+  "name": "budget-wise",
+  "version": "1.0.0",
+  "description": "SWE assignment",
+  "keywords": [
+    "fintech"
+  ],
+  "homepage": "https://github.com/yasmin-mohamed5/Budget-Wise#readme",
+  "bugs": {
+    "url": "https://github.com/yasmin-mohamed5/Budget-Wise/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yasmin-mohamed5/Budget-Wise.git"
+  },
+  "license": "ISC",
+  "author": "yasmin",
+  "type": "commonjs",
+  "main": "app.js",
+  "scripts": {
+    "dev": "ts-node src/app.ts",
+    "build": "tsc",
+    "start": "node dist/app.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mongoose": "^9.6.0",
+    "morgan": "^1.10.1",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "uuid": "^14.0.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/morgan": "^1.9.10",
+    "@types/node": "^25.6.0",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
+  }
+}

@@ -1,8 +1,0 @@
-🔹 Role:
-
-This is where you define what URLs your backend exposes
-
-👉 It connects:
-
-HTTP request (GET, POST…)
-➡️ Controller function
