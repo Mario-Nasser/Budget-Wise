@@ -1,40 +1,41 @@
-const FinancialGoalService = require('../services/financialGoalService');
+import { Request, Response } from 'express';
+import FinancialGoalService from '../services/financialGoalService';
 
-exports.createGoal = async (req, res) => {
+export const createGoal = async (req: Request, res: Response) => {
   try {
     const goal = await FinancialGoalService.createGoal(req.body);
     res.status(201).json(goal);
-  } catch (err) {
+  } catch (err: any) {
     res.status(400).json({ error: err.message });
   }
 };
 
-exports.getGoal = async (req, res) => {
+export const getGoal = async (req: Request, res: Response) => {
   try {
     const goal = await FinancialGoalService.getGoal(req.params.id);
     res.json(goal);
-  } catch (err) {
+  } catch (err: any) {
     res.status(404).json({ error: err.message });
   }
 };
 
-exports.updateProgress = async (req, res) => {
+export const updateProgress = async (req: Request, res: Response) => {
   try {
     const goal = await FinancialGoalService.updateProgress(
       req.params.id,
       req.body.amount
     );
     res.json(goal);
-  } catch (err) {
+  } catch (err: any) {
     res.status(400).json({ error: err.message });
   }
 };
 
-exports.getAllGoals = async (req, res) => {
+export const getAllGoals = async (req: Request, res: Response) => {
   try {
     const goals = await FinancialGoalService.getAllGoals();
     res.json(goals);
-  } catch (err) {
+  } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
 };

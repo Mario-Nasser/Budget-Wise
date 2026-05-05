@@ -1,11 +1,19 @@
-class FinancialGoal {
-  #goalId;
-  #goalName;
-  #targetAmount;
-  #currentAmount;
-  #deadline;
+interface GoalData {
+  goalId: string;
+  goalName: string;
+  targetAmount: number;
+  currentAmount?: number;
+  deadline: Date | string;
+}
 
-  constructor({ goalId, goalName, targetAmount, currentAmount = 0, deadline }) {
+export class FinancialGoal {
+  #goalId: string;
+  #goalName: string;
+  #targetAmount: number;
+  #currentAmount: number;
+  #deadline: Date;
+
+  constructor({ goalId, goalName, targetAmount, currentAmount = 0, deadline }: GoalData) {
     this.#goalId = goalId;
     this.#goalName = goalName;
     this.#targetAmount = targetAmount;
@@ -13,17 +21,17 @@ class FinancialGoal {
     this.#deadline = new Date(deadline);
   }
 
-  updateProgress(amount) {
+  updateProgress(amount: number) {
     if (amount <= 0) throw new Error("Amount must be positive");
     this.#currentAmount += amount;
   }
 
-  calculateProgress() {
+  calculateProgress(): number {
     if (this.#targetAmount === 0) return 0;
     return (this.#currentAmount / this.#targetAmount) * 100;
   }
 
-  isAchieved() {
+  isAchieved(): boolean {
     return this.#currentAmount >= this.#targetAmount;
   }
 
@@ -46,4 +54,4 @@ class FinancialGoal {
   }
 }
 
-module.exports = FinancialGoal;
+// export default FinancialGoal;

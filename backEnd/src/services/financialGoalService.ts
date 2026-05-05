@@ -1,10 +1,10 @@
-const FinancialGoal = require('../classes/FinancialGoal');
-const FinancialGoalModel = require('../models/financialGoalModel');
-const { v4: uuidv4 } = require('uuid');
+import { FinancialGoal } from '../classes/financialGoal';
+import FinancialGoalModel from '../models/financialGoalModel';
+import { v4 as uuidv4 } from 'uuid';
 
 class FinancialGoalService {
 
-  static async createGoal(data) {
+  static async createGoal(data: any) {
     const goal = new FinancialGoal({
       goalId: uuidv4(),
       ...data
@@ -13,7 +13,7 @@ class FinancialGoalService {
     return await FinancialGoalModel.create(goal.getData());
   }
 
-  static async getGoal(goalId) {
+  static async getGoal(goalId: string) {
     const data = await FinancialGoalModel.findOne({ goalId });
 
     if (!data) throw new Error("Goal not found");
@@ -22,7 +22,7 @@ class FinancialGoalService {
     return goal.getFullDetails();
   }
 
-  static async updateProgress(goalId, amount) {
+  static async updateProgress(goalId: string, amount: number) {
     const data = await FinancialGoalModel.findOne({ goalId });
 
     if (!data) throw new Error("Goal not found");
@@ -48,4 +48,4 @@ class FinancialGoalService {
   }
 }
 
-module.exports = FinancialGoalService;
+export default FinancialGoalService;

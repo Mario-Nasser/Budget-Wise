@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const FinancialGoalSchema = new mongoose.Schema({
   goalId: { type: String, unique: true },
@@ -8,4 +8,4 @@ const FinancialGoalSchema = new mongoose.Schema({
   deadline: Date
 });
 
-module.exports = mongoose.model('FinancialGoal', FinancialGoalSchema);
+export default mongoose.model('FinancialGoal', FinancialGoalSchema);

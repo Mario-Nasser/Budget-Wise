@@ -128,13 +128,14 @@
  *         description: Goal not found
  */
 
-const express = require('express');
+import express from 'express';
+import * as controller from '../controllers/financialGoalController';
+
 const router = express.Router();
-const controller = require('../controllers/financialGoalController');
 
 router.post('/', controller.createGoal);
 router.get('/', controller.getAllGoals);
 router.get('/:id', controller.getGoal);
 router.patch('/:id/progress', controller.updateProgress);
 
-module.exports = router;
+export default router;
