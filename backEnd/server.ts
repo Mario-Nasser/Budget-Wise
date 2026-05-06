@@ -1,9 +1,6 @@
-import dotenv from 'dotenv';
 import express from 'express';
-import connectDB from './config/db';
-import transactionRoutes from './routes/transactionRoutes';
-
-dotenv.config({ path: './db.env' });
+import connectDB from './src/config/db';
+import transactionRoutes from './src/routes/transactionRoutes';
 
 const app = express();
 

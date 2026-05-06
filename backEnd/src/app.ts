@@ -25,8 +25,8 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 // routes
 app.use('/goals', goalRoutes);
 
-// static files
-app.use(express.static(path.join(__dirname, '..', 'frontEnd')));
+// static files - serve from root frontEnd directory
+app.use(express.static(path.join(__dirname, '../../frontEnd')));
 
 // server
 app.listen(3000, () => {
