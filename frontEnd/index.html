@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Financial Goals</title>
+</head>
+<body>
+
+  <h2>Create Goal</h2>
+  <input id="name" placeholder="Goal Name">
+  <input id="target" type="number" placeholder="Target Amount">
+  <input id="deadline" type="date">
+  <button onclick="createGoal()">Create</button>
+
+  <h2>All Goals</h2>
+  <button onclick="getAllGoals()">Load Goals</button>
+
+  <div id="goals"></div>
+
+  <script src="assets/js/index.js"></script>
+</body>
+</html>
