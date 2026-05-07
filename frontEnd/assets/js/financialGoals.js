@@ -40,7 +40,7 @@ function displayGoals(goals) {
 
   goals.forEach(goal => {
     container.innerHTML += `
-      <div style="border:1px solid black; margin:10px; padding:10px;">
+      <div class="goal-card">
         <h3>${goal.goalName}</h3>
         <p>Target: ${goal.targetAmount}</p>
         <p>Current: ${goal.currentAmount}</p>
