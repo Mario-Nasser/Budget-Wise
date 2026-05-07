@@ -5,7 +5,9 @@ import swaggerUi from 'swagger-ui-express';
 import swaggerDocs from './swagger';
 import path from 'path';
 import goalRoutes from './routes/financialGoalRoutes';
+import reportRoutes from './routes/reportRoutes';
 import morgan from 'morgan';
+import transactionRoutes from './routes/transactionRoutes';
 
 const app: Application = express();
 
@@ -23,7 +25,13 @@ connectDB();
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // routes
+
 app.use('/goals', goalRoutes);
+app.use('/reports', reportRoutes);
+app.use('/transactions', transactionRoutes);
+app.get('/', (req, res) => {
+  res.send('Budget Wise API Running');
+});
 
 // static files - serve from root frontEnd directory
 app.use(express.static(path.join(__dirname, '../../frontEnd')));

@@ -1,9 +1,8 @@
-import mongoose, { HydratedDocument, Model, Schema, Types } from 'mongoose';
+import mongoose, { HydratedDocument, Model, Schema } from 'mongoose';
 
 export type CategoryType = 'income' | 'expense';
 
 export interface ICategory {
-    userId: Types.ObjectId | null;
     name: string;
     type: CategoryType;
     isDefault: boolean;
@@ -33,11 +32,6 @@ const DEFAULT_CATEGORIES: Array<Pick<ICategory, 'name' | 'type' | 'isDefault'>> 
 
 const categorySchema = new Schema<ICategory, CategoryModel>(
     {
-        userId: {
-            type: Schema.Types.ObjectId,
-            ref: 'User',
-            default: null
-        },
         name: {
             type: String,
             required: [true, 'Category name is required'],

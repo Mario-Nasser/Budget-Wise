@@ -49,7 +49,6 @@ const normalizeText = (value: unknown): string => (typeof value === 'string' ? v
 
 const findAvailableCategory = async (
     categoryId: string,
-    userId: string,
     type: CategoryType = 'expense'
 ): Promise<CategoryDocument> => {
     const category = await Category.findOne({
@@ -57,7 +56,6 @@ const findAvailableCategory = async (
         type,
         $or: [
             { isDefault: true },
-            { userId }
         ]
     });
 
@@ -70,7 +68,6 @@ const findAvailableCategory = async (
 
 const TransactionService = {
     addTransaction: async (
-        userId: string,
         amount: number | string,
         type: TransactionTypeInput,
         description = '',
@@ -102,7 +99,6 @@ const TransactionService = {
             }
 
             newTransaction = new Income({
-                userId,
                 amount: numericAmount,
                 date: date || new Date(),
                 description: normalizeText(description),
@@ -114,9 +110,8 @@ const TransactionService = {
                 throw new Error('Category is required for an expense.');
             }
 
-            await findAvailableCategory(categoryId, userId, 'expense');
+            await findAvailableCategory(categoryId, 'expense');
             newTransaction = new Expense({
-                userId,
                 amount: numericAmount,
                 date: date || new Date(),
                 description: normalizeText(description),
@@ -130,7 +125,7 @@ const TransactionService = {
         }
 
         const savedTransaction = await newTransaction.addTransaction();
-        const newBalance = await TransactionService.calculateBalance(userId);
+        const newBalance = await TransactionService.calculateBalance();
 
         return {
             savedTransaction,
@@ -140,16 +135,12 @@ const TransactionService = {
 
     editTransaction: async (
         transactionId: string,
-        userId: string,
         updates: TransactionUpdates
     ): Promise<EditTransactionResult> => {
         const transaction = await Transaction.findById(transactionId);
 
         if (!transaction) {
             throw new Error('Transaction not found.');
-        }
-        if (transaction.userId.toString() !== userId.toString()) {
-            throw new Error('You are not authorized to edit this transaction.');
         }
 
         const allowedUpdates: TransactionUpdates = {};
@@ -214,7 +205,7 @@ const TransactionService = {
             if (transaction.type !== 'Expense') {
                 throw new Error('Category can only be updated for expense transactions.');
             }
-            await findAvailableCategory(allowedUpdates.categoryId, userId, 'expense');
+            await findAvailableCategory(allowedUpdates.categoryId, 'expense');
             allowedUpdates.category = allowedUpdates.categoryId;
             delete allowedUpdates.categoryId;
         }
@@ -225,24 +216,20 @@ const TransactionService = {
             { new: true, runValidators: true }
         ).populate('category', 'name type');
 
-        const newBalance = await TransactionService.calculateBalance(userId);
+        const newBalance = await TransactionService.calculateBalance();
 
         return { updatedTransaction, newBalance };
     },
 
-    deleteTransaction: async (transactionId: string, userId: string): Promise<DeleteTransactionResult> => {
+    deleteTransaction: async (transactionId: string): Promise<DeleteTransactionResult> => {
         const transaction = await Transaction.findById(transactionId);
 
         if (!transaction) {
             throw new Error('Transaction not found.');
         }
 
-        if (transaction.userId.toString() !== userId.toString()) {
-            throw new Error('You are not authorized to delete this transaction.');
-        }
-
         await Transaction.findByIdAndDelete(transactionId);
-        const newBalance = await TransactionService.calculateBalance(userId);
+        const newBalance = await TransactionService.calculateBalance();
 
         return {
             deletedTransaction: transaction,
@@ -251,10 +238,9 @@ const TransactionService = {
     },
 
     getAllTransactions: async (
-        userId: string,
         filters: TransactionFilters = {}
     ): Promise<GetAllTransactionsResult> => {
-        const transactions = await Transaction.fetchTransactions(userId, filters);
+        const transactions = await Transaction.fetchTransactions(filters);
 
         let totalIncome = 0;
         let totalExpenses = 0;
@@ -282,22 +268,19 @@ const TransactionService = {
         };
     },
 
-    getTransactionById: async (transactionId: string, userId: string): Promise<TransactionDocument> => {
+    getTransactionById: async (transactionId: string): Promise<TransactionDocument> => {
         const transaction = await Transaction.findById(transactionId).populate('category', 'name type');
 
         if (!transaction) {
             throw new Error('Transaction not found.');
         }
-        if (transaction.userId.toString() !== userId.toString()) {
-            throw new Error('You are not authorized to view this transaction.');
-        }
+
 
         return transaction;
     },
 
-    calculateBalance: async (userId: string): Promise<number> => {
+    calculateBalance: async (): Promise<number> => {
         const result: Array<{ _id: 'Income' | 'Expense'; totalAmount: number }> = await Transaction.aggregate([
-            { $match: { userId: new mongoose.Types.ObjectId(userId) } },
             {
                 $group: {
                     _id: '$type',
@@ -320,7 +303,7 @@ const TransactionService = {
         return Number((totalIncome - totalExpenses).toFixed(2));
     },
 
-    createCategory: async (userId: string, name: string, type: string): Promise<CategoryDocument> => {
+    createCategory: async ( name: string, type: string): Promise<CategoryDocument> => {
         const cleanName = normalizeText(name);
         const cleanType = normalizeText(type).toLowerCase() as CategoryType;
 
@@ -337,7 +320,6 @@ const TransactionService = {
             type: cleanType,
             $or: [
                 { isDefault: true },
-                { userId }
             ]
         });
 
@@ -346,7 +328,6 @@ const TransactionService = {
         }
 
         const category = new Category({
-            userId,
             name: cleanName,
             type: cleanType,
             isDefault: false
@@ -355,7 +336,7 @@ const TransactionService = {
         return await category.createCategory();
     },
 
-    deleteCategory: async (categoryId: string, userId: string): Promise<CategoryDocument> => {
+    deleteCategory: async (categoryId: string): Promise<CategoryDocument> => {
         const category = await Category.findById(categoryId);
 
         if (!category) {
@@ -363,9 +344,6 @@ const TransactionService = {
         }
         if (category.isDefault) {
             throw new Error('Cannot delete a default system category.');
-        }
-        if (!category.userId || category.userId.toString() !== userId.toString()) {
-            throw new Error('You are not authorized to delete this category.');
         }
 
         const usedByExpense = await Expense.exists({ category: categoryId });
@@ -377,11 +355,10 @@ const TransactionService = {
         return category;
     },
 
-    getAllCategories: async (userId: string): Promise<CategoryDocument[]> => {
+    getAllCategories: async (): Promise<CategoryDocument[]> => {
         return await Category.find({
             $or: [
                 { isDefault: true },
-                { userId }
             ]
         }).sort({ name: 1 });
     },

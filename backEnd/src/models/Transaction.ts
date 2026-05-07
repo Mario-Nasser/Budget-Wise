@@ -10,7 +10,6 @@ export interface TransactionFilters {
 }
 
 export interface ITransaction {
-    userId: Types.ObjectId;
     amount: number;
     date: Date;
     description: string;
@@ -23,7 +22,6 @@ export interface ITransaction {
 export type TransactionDocument = HydratedDocument<ITransaction>;
 
 interface TransactionQuery {
-    userId: string | Types.ObjectId;
     type?: TransactionType;
     category?: string;
     date?: {
@@ -33,16 +31,11 @@ interface TransactionQuery {
 }
 
 interface TransactionModel extends Model<ITransaction> {
-    fetchTransactions(userId: string | Types.ObjectId, filters?: TransactionFilters): Promise<TransactionDocument[]>;
+    fetchTransactions(filters?: TransactionFilters): Promise<TransactionDocument[]>;
 }
 
 const transactionSchema = new Schema<ITransaction, TransactionModel>(
     {
-        userId: {
-            type: Schema.Types.ObjectId,
-            ref: 'User',
-            required: [true, 'UserId is required']
-        },
         amount: {
             type: Number,
             required: [true, 'Please enter an amount.'],
@@ -90,10 +83,9 @@ transactionSchema.methods.editTransaction = async function (
 };
 
 transactionSchema.statics.fetchTransactions = async function (
-    userId: string | Types.ObjectId,
     filters: TransactionFilters = {}
 ): Promise<TransactionDocument[]> {
-    const query: TransactionQuery = { userId };
+    const query: TransactionQuery = {};
 
     if (filters.type) {
         query.type = filters.type;

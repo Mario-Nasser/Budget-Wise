@@ -4,6 +4,11 @@
   <title>Financial Goals</title>
 </head>
 <body>
+  <nav>
+    <a href="index.html">Financial Goals</a>
+    <a href="report.html">Report</a>
+    <a href="addTransaction.html">Add Transaction</a>
+  </nav>
 
   <h2>Create Goal</h2>
   <input id="name" placeholder="Goal Name">
@@ -12,10 +17,10 @@
   <button onclick="createGoal()">Create</button>
 
   <h2>All Goals</h2>
-  <button onclick="getAllGoals()">Load Goals</button>
+  <button onclick="getAllGoals()">Display Goals</button>
 
   <div id="goals"></div>
 
-  <script src="assets/js/index.js"></script>
+  <script src="assets/js/financialGoals.js"></script>
 </body>
 </html>

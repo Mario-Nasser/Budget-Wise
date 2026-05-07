@@ -38,10 +38,8 @@ const transactionController = {
                 note
             } = req.body;
 
-            const userId = req.user.id;
 
             const { savedTransaction, newBalance } = await transactionService.addTransaction(
-                userId,
                 amount,
                 type,
                 description,
@@ -72,7 +70,6 @@ const transactionController = {
 
     getAllTransactions: async (req: Request, res: Response): Promise<void> => {
         try {
-            const userId = req.user.id;
             const type = getQueryString(req.query.type);
 
             const filters: TransactionFilters = {
@@ -82,7 +79,7 @@ const transactionController = {
                 endDate: getQueryString(req.query.endDate)
             };
 
-            const result = await transactionService.getAllTransactions(userId, filters);
+            const result = await transactionService.getAllTransactions(filters);
 
             if (result.transactions.length === 0) {
                 res.status(200).json({
@@ -103,10 +100,9 @@ const transactionController = {
 
     getTransaction: async (req: Request, res: Response): Promise<void> => {
         try {
-            const userId = req.user.id;
             const transactionId = getParamString(req.params.id);
 
-            const transaction = await transactionService.getTransactionById(transactionId, userId);
+            const transaction = await transactionService.getTransactionById(transactionId);
 
             res.status(200).json({
                 message: 'Transaction retrieved successfully.',
@@ -120,13 +116,11 @@ const transactionController = {
 
     updateTransaction: async (req: Request, res: Response): Promise<void> => {
         try {
-            const userId = req.user.id;
             const transactionId = getParamString(req.params.id);
             const updates = req.body as TransactionUpdates;
 
             const { updatedTransaction, newBalance } = await transactionService.editTransaction(
                 transactionId,
-                userId,
                 updates
             );
 
@@ -145,11 +139,9 @@ const transactionController = {
 
     deleteTransaction: async (req: Request, res: Response): Promise<void> => {
         try {
-            const userId = req.user.id;
             const transactionId = getParamString(req.params.id);
             const { deletedTransaction, newBalance } = await transactionService.deleteTransaction(
                 transactionId,
-                userId
             );
 
             res.status(200).json({
@@ -167,10 +159,9 @@ const transactionController = {
 
     createCategory: async (req: Request, res: Response): Promise<void> => {
         try {
-            const userId = req.user.id;
             const { name, type } = req.body;
 
-            const category = await transactionService.createCategory(userId, name, type);
+            const category = await transactionService.createCategory(name, type);
 
             res.status(201).json({
                 message: 'Category created successfully.',
@@ -183,8 +174,7 @@ const transactionController = {
 
     getAllCategories: async (req: Request, res: Response): Promise<void> => {
         try {
-            const userId = req.user.id;
-            const categories = await transactionService.getAllCategories(userId);
+            const categories = await transactionService.getAllCategories();
 
             res.status(200).json({
                 message: 'Categories retrieved successfully.',
@@ -197,10 +187,9 @@ const transactionController = {
 
     deleteCategory: async (req: Request, res: Response): Promise<void> => {
         try {
-            const userId = req.user.id;
             const categoryId = getParamString(req.params.id);
 
-            await transactionService.deleteCategory(categoryId, userId);
+            await transactionService.deleteCategory(categoryId);
 
             res.status(200).json({
                 message: 'Category deleted successfully.'

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BudgetWise - Transactions</title>
+    <link rel="stylesheet" href="./assets/css/addTransaction.css">
+</head>
+<body>
+    <nav>
+        <a href="index.html">Financial Goals</a>
+        <a href="report.html">Report</a>
+        <a href="addTransaction.html">Add Transaction</a>
+    </nav>
+    <div class="container">
+        <h1>Budget Management</h1>
+        
+        <section id="auth-section">
+            <input type="text" id="token" placeholder="Paste your JWT Token here">
+            <button onclick="saveToken()">Save Token</button>
+        </section>
+
+        <hr>
+
+        <section>
+            <h2>Add Category</h2>
+            <form id="category-form">
+                <input type="text" id="cat-name" placeholder="Category Name" required>
+                <select id="cat-type">
+                    <option value="expense">Expense</option>
+                    <option value="income">Income</option>
+                </select>
+                <button type="submit">Create Category</button>
+            </form>
+        </section>
+
+        <hr>
+
+        <section>
+            <h2>Add Transaction</h2>
+            <form id="transaction-form">
+                <input type="number" id="trans-amount" placeholder="Amount" step="0.01" required>
+                <select id="trans-type">
+                    <option value="Expense">Expense</option>
+                    <option value="Income">Income</option>
+                </select>
+                <input type="text" id="trans-desc" placeholder="Description">
+                <button type="submit">Add Transaction</button>
+            </form>
+        </section>
+
+        <hr>
+
+        <section>
+            <h2>Recent History</h2>
+            <button onclick="fetchData()">Refresh Data</button>
+            <div id="display-area">
+                <p>Loading data...</p>
+            </div>
+        </section>
+    </div>
+    <script src="./assets/js/addTransaction.js"></script>
+</body>
+</html>
