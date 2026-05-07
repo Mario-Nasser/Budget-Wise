@@ -20,7 +20,7 @@ function generateReport(e) {
         startDate.value = thirtyDaysAgo.toISOString().split('T')[0];
     }
     if(!pattern.value) {
-        pattern.value = 'week'; // Default pattern
+        pattern.value = 'day'; // Default pattern
     }else if(pattern.value === 'month' && (new Date(endDate.value) - new Date(startDate.value)) < 30 * 24 * 60 * 60 * 1000) {
         patternError.textContent = 'Please select a date range of greater than 30 days for monthly pattern.';
         return;
@@ -85,10 +85,10 @@ function displayReportInfo(reportData) {
     document.getElementById('netSavings').textContent = `$${(reportData.totalIncome - reportData.totalExpenses).toFixed(2)}`;
 
     // Category breakdown
-    const categoryBreakdownHTML = reportData.categoryBreakdown
+    const categoryBreakdownHTML = reportData.expenseByCategory
         .map(cat => `
             <div>
-                <strong>${cat.categoryName}</strong>: $${cat.amount.toFixed(2)} (${cat.percentage.toFixed(1)}%)
+                <strong>${cat.categoryName}</strong>: $${cat.totalAmount.toFixed(2)} (${cat.percentage.toFixed(1)}%)
             </div>
         `)
         .join('');

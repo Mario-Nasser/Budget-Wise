@@ -1,45 +1,43 @@
-import mongoose, { Types } from "mongoose";
-import Category, { CategoryDocument, CategoryType } from "../models/Category";
-import Expense from "../models/Expense";
-import Income from "../models/Income";
-import Transaction, {
-  TransactionDocument,
-  TransactionFilters,
-} from "../models/Transaction";
+import { SpendingPattern, Report, ExpenseByCategory } from "../models/Reports.dto";
+import Transaction, { TransactionFilters } from "../models/Transaction";
 
 class ReportService {
-  static async getReport(filters: TransactionFilters, groupBy: "day" | "week" | "month" = "week") {
-    const [totalIncome, totalExpenses, expenseByCategory, spendingPattern] = await Promise.all([
-      this.totalIncome(filters),
-      this.totalExpenses(filters),
-      this.expenseByCategory(filters),
-      this.spendingPattern(filters, groupBy),
-
-    ]);
-    return {
-        totalIncome,
-        totalExpenses,
-        categoryBreakdown: expenseByCategory.map((c) => {
-          const total = totalExpenses || 1; // avoid division by zero
-          return {
-            categoryName: c.categoryName,
-            amount: c.totalAmount,
-            percentage: (c.totalAmount / total) * 100,
-          };
-        }),
-        categoryChart: {
+  static async getReport(
+    filters: TransactionFilters,
+    groupBy: "day" | "week" | "month" = "week",
+  ): Promise<Report> {
+    const [totalIncome, totalExpenses, expenseByCategory, spendingPattern] =
+      await Promise.all([
+        this.totalIncome(filters),
+        this.totalExpenses(filters),
+        this.expenseByCategory(filters),
+        this.spendingPattern(filters, groupBy),
+      ]);
+    const result: Report = {
+      totalIncome: totalIncome,
+      totalExpenses: totalExpenses,
+      expenseByCategory: expenseByCategory.map((c) => {
+        const total = totalExpenses || 1; // avoid division by zero
+        return {
+          categoryName: c.categoryName,
+          totalAmount: c.totalAmount,
+          percentage: (c.totalAmount / total) * 100,
+        };
+      }),
+      categoryChart: {
         labels: expenseByCategory.map((c) => c.categoryName),
         values: expenseByCategory.map((c) => c.totalAmount),
-        },
-        spendingPattern,
+      },
+      spendingPattern: spendingPattern,
     };
 
+    return result;
   }
-  // pattens
+  // spending patterns
   static async spendingPattern(
     filters: TransactionFilters = {},
     groupBy: "day" | "week" | "month" = "week",
-  ) {
+  ): Promise<SpendingPattern[]> {
     const dateFilter =
       filters.startDate || filters.endDate
         ? {
@@ -74,23 +72,26 @@ class ReportService {
       };
     }
 
-    return await Transaction.aggregate([
+    const pattern: SpendingPattern[] = await Transaction.aggregate([
       {
         $match: {
           type: "Expense",
           ...dateFilter,
         },
       },
-      { // group by the specified pattern and sum amounts
+      {
+        // group by the specified pattern and sum amounts
         $group: {
           _id: groupStage,
           totalSpent: { $sum: "$amount" },
         },
       },
-      { // sort by date ascending
+      {
+        // sort by date ascending
         $sort: { _id: 1 },
       },
-      { // project the output to have a readable period format
+      {
+        // project the output to have a readable period format
         $project: {
           _id: 0,
           period: "$_id",
@@ -98,11 +99,11 @@ class ReportService {
         },
       },
     ]);
+
+    return pattern;
   }
   // Calculate total income for a user with optional date filters
-  static async totalIncome(
-    filters: TransactionFilters,
-  ): Promise<number> {
+  static async totalIncome(filters: TransactionFilters): Promise<number> {
     const result = await Transaction.aggregate([
       {
         $match: {
@@ -133,9 +134,7 @@ class ReportService {
   }
 
   // Calculate total expenses for a user with optional date filters
-  static async totalExpenses(
-    filters: TransactionFilters,
-  ): Promise<number> {
+  static async totalExpenses(filters: TransactionFilters): Promise<number> {
     const result = await Transaction.aggregate([
       {
         $match: {
@@ -168,7 +167,7 @@ class ReportService {
   // Get expense breakdown by category for a user with optional date filters
   static async expenseByCategory(
     filters: TransactionFilters = {},
-  ) {
+  ): Promise<ExpenseByCategory[]> {
     const dateFilter =
       filters.startDate || filters.endDate
         ? {
@@ -183,8 +182,7 @@ class ReportService {
           }
         : {};
 
-    // return array of categories with total expenses for each category
-    return await Transaction.aggregate([
+    const result: ExpenseByCategory[] = await Transaction.aggregate([
       {
         // condition to match only expenses for the user and apply date filters if provided
         $match: {
@@ -221,6 +219,8 @@ class ReportService {
         },
       },
     ]);
+
+    return result;
   }
 }
 
