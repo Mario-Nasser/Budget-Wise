@@ -1,0 +1,6 @@
+/* Basic styling for the goals section */
+#goals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}

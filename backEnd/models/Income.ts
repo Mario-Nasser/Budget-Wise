@@ -3,6 +3,7 @@ import Transaction, { ITransaction } from './Transaction';
 
 export interface IIncome extends ITransaction {
     source: string;
+    category?: Schema.Types.ObjectId;
 }
 
 const incomeSchema = new Schema<IIncome>({
@@ -11,6 +12,11 @@ const incomeSchema = new Schema<IIncome>({
         required: [true, 'Income source is required'],
         trim: true,
         maxlength: [100, 'Source cannot exceed 100 characters']
+    },
+    category: {
+        type: Schema.Types.ObjectId,
+        ref: 'Category',
+        required: false
     }
 });
 

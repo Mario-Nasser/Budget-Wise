@@ -22,7 +22,7 @@ const authMiddleware = (req: Request, res: Response, next: NextFunction): void =
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as AuthTokenPayload;
 
-        req.user = {
+        (req as any).user = {
             id: decoded.id,
             name: decoded.name,
             email: decoded.email

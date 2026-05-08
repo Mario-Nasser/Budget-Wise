@@ -101,13 +101,18 @@ const TransactionService = {
                 throw new Error('Income source is required.');
             }
 
+            if (categoryId) {
+                await findAvailableCategory(categoryId, userId, 'income');
+            }
+
             newTransaction = new Income({
                 userId,
                 amount: numericAmount,
                 date: date || new Date(),
                 description: normalizeText(description),
                 type: 'Income',
-                source: cleanSource
+                source: cleanSource,
+                category: categoryId
             }) as TransactionDocument;
         } else if (transactionType === 'expense') {
             if (!categoryId) {
@@ -211,10 +216,8 @@ const TransactionService = {
         }
 
         if (allowedUpdates.categoryId) {
-            if (transaction.type !== 'Expense') {
-                throw new Error('Category can only be updated for expense transactions.');
-            }
-            await findAvailableCategory(allowedUpdates.categoryId, userId, 'expense');
+            const categoryType = transaction.type.toLowerCase() as CategoryType;
+            await findAvailableCategory(allowedUpdates.categoryId, userId, categoryType);
             allowedUpdates.category = allowedUpdates.categoryId;
             delete allowedUpdates.categoryId;
         }

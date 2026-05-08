@@ -38,7 +38,7 @@ const transactionController = {
                 note
             } = req.body;
 
-            const userId = req.user.id;
+            const userId = (req as any).user.id;
 
             const { savedTransaction, newBalance } = await transactionService.addTransaction(
                 userId,
@@ -72,7 +72,7 @@ const transactionController = {
 
     getAllTransactions: async (req: Request, res: Response): Promise<void> => {
         try {
-            const userId = req.user.id;
+            const userId = (req as any).user.id;
             const type = getQueryString(req.query.type);
 
             const filters: TransactionFilters = {
@@ -103,7 +103,7 @@ const transactionController = {
 
     getTransaction: async (req: Request, res: Response): Promise<void> => {
         try {
-            const userId = req.user.id;
+            const userId = (req as any).user.id;
             const transactionId = getParamString(req.params.id);
 
             const transaction = await transactionService.getTransactionById(transactionId, userId);
@@ -120,7 +120,7 @@ const transactionController = {
 
     updateTransaction: async (req: Request, res: Response): Promise<void> => {
         try {
-            const userId = req.user.id;
+            const userId = (req as any).user.id;
             const transactionId = getParamString(req.params.id);
             const updates = req.body as TransactionUpdates;
 
@@ -145,7 +145,7 @@ const transactionController = {
 
     deleteTransaction: async (req: Request, res: Response): Promise<void> => {
         try {
-            const userId = req.user.id;
+            const userId = (req as any).user.id;
             const transactionId = getParamString(req.params.id);
             const { deletedTransaction, newBalance } = await transactionService.deleteTransaction(
                 transactionId,
@@ -167,7 +167,7 @@ const transactionController = {
 
     createCategory: async (req: Request, res: Response): Promise<void> => {
         try {
-            const userId = req.user.id;
+            const userId = (req as any).user.id;
             const { name, type } = req.body;
 
             const category = await transactionService.createCategory(userId, name, type);
@@ -183,7 +183,7 @@ const transactionController = {
 
     getAllCategories: async (req: Request, res: Response): Promise<void> => {
         try {
-            const userId = req.user.id;
+            const userId = (req as any).user.id;
             const categories = await transactionService.getAllCategories(userId);
 
             res.status(200).json({
@@ -197,7 +197,7 @@ const transactionController = {
 
     deleteCategory: async (req: Request, res: Response): Promise<void> => {
         try {
-            const userId = req.user.id;
+            const userId = (req as any).user.id;
             const categoryId = getParamString(req.params.id);
 
             await transactionService.deleteCategory(categoryId, userId);
