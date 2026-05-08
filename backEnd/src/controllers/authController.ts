@@ -4,14 +4,16 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 // ===== Brute Force Protection =====
-const loginAttempts: Record<string, { count: number; lastAttempt: number }> = {};
+const loginAttempts: Record<string, { count: number; lastAttempt: number }> =
+  {};
 
 function checkBruteForce(email: string): number {
   const now = Date.now();
-  if (!loginAttempts[email]) loginAttempts[email] = { count: 0, lastAttempt: now };
+  if (!loginAttempts[email])
+    loginAttempts[email] = { count: 0, lastAttempt: now };
   const entry = loginAttempts[email];
-  // reset after 15 minutes
-  if (now - entry.lastAttempt > 15 * 60 * 1000) entry.count = 0;
+  // reset after 5 minutes
+  if (now - entry.lastAttempt > 5 * 60 * 1000) entry.count = 0;
   entry.lastAttempt = now;
   entry.count++;
   return entry.count;
@@ -29,7 +31,9 @@ export const register = async (req: Request, res: Response) => {
 
     // 2. name length
     if (name.trim().length < 2) {
-      return res.status(400).json({ message: "Name must be at least 2 characters" });
+      return res
+        .status(400)
+        .json({ message: "Name must be at least 2 characters" });
     }
 
     // 3. email format
@@ -40,13 +44,16 @@ export const register = async (req: Request, res: Response) => {
 
     // 4. password length
     if (password.length < 8) {
-      return res.status(400).json({ message: "Password must be at least 8 characters" });
+      return res
+        .status(400)
+        .json({ message: "Password must be at least 8 characters" });
     }
 
     // 5. password strength: uppercase + lowercase + number
     if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
       return res.status(400).json({
-        message: "Password must contain an uppercase letter, a lowercase letter, and a number",
+        message:
+          "Password must contain an uppercase letter, a lowercase letter, and a number",
       });
     }
 
@@ -77,7 +84,6 @@ export const register = async (req: Request, res: Response) => {
       message: "Register successful",
       user: userWithoutPassword,
     });
-
   } catch (error) {
     return res.status(500).json({ message: "Server Error" });
   }
@@ -90,14 +96,17 @@ export const login = async (req: Request, res: Response) => {
 
     // 1. required fields
     if (!email || !password) {
-      return res.status(400).json({ message: "Email and password are required" });
+      return res
+        .status(400)
+        .json({ message: "Email and password are required" });
     }
 
-    // 2. brute force check (max 5 attempts, 15-min lockout)
+    // 2. brute force check (max 5 attempts, 5-min lockout)
     const attempts = checkBruteForce(email);
     if (attempts > 5) {
       return res.status(429).json({
-        message: "Too many failed attempts. Please wait 15 minutes and try again.",
+        message:
+          "Too many failed attempts. Please wait 5 minutes and try again.",
       });
     }
 
@@ -121,8 +130,10 @@ export const login = async (req: Request, res: Response) => {
     const token = jwt.sign(
       { id: user._id, email: user.email },
       process.env.JWT_SECRET as string,
-      { expiresIn }
+      { expiresIn },
     );
+
+    console.log(token);
 
     const { password: _, ...userWithoutPassword } = user.toObject();
 
@@ -131,7 +142,6 @@ export const login = async (req: Request, res: Response) => {
       token,
       user: userWithoutPassword,
     });
-
   } catch (error) {
     return res.status(500).json({ message: "Server Error" });
   }

@@ -6,6 +6,7 @@ nav {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
     display: flex;
+    justify-content: center;
     gap: 15px;
     align-items: center;
     flex-wrap: wrap;

@@ -169,19 +169,28 @@
  *         description: Transaction deleted
  */
 
-import { Router } from 'express';
-import transactionController from '../controllers/transactionController';
+import { Router } from "express";
+import transactionController from "../controllers/transactionController";
+import { verifyToken } from "../middleware/authMiddleware";
 
 const router = Router();
 
-router.post('/categories', transactionController.createCategory);
-router.get('/categories', transactionController.getAllCategories);
-router.delete('/categories/:id', transactionController.deleteCategory);
+router.use(verifyToken);
 
-router.post('/', transactionController.createTransaction);
-router.get('/', transactionController.getAllTransactions);
-router.get('/:id', transactionController.getTransaction);
-router.put('/:id', transactionController.updateTransaction);
-router.delete('/:id', transactionController.deleteTransaction);
+/* ======================
+   CATEGORIES
+====================== */
+router.post('/categories', verifyToken, transactionController.createCategory);
+router.get('/categories', verifyToken, transactionController.getAllCategories);
+router.delete('/categories/:id', verifyToken, transactionController.deleteCategory);
+
+/* ======================
+   TRANSACTIONS
+====================== */
+router.post('/', verifyToken, transactionController.createTransaction);
+router.get("/", verifyToken, transactionController.getAllTransactions);
+router.get("/:id", verifyToken, transactionController.getTransaction);
+router.put("/:id", verifyToken, transactionController.updateTransaction);
+router.delete("/:id", verifyToken, transactionController.deleteTransaction);
 
 export default router;
