@@ -13,6 +13,8 @@
 // export default connectDB;
 import mongoose from 'mongoose';
 import Category from '../models/Category';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const connectDB = async (): Promise<void> => {
     try {
