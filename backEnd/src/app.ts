@@ -1,11 +1,15 @@
+import dotenv from 'dotenv';
+import path from 'path';
+dotenv.config({ path: path.join(__dirname, '.env') });
+
 import express, { Application } from 'express';
 import cors from 'cors';
 import connectDB from './config/db';
 import swaggerUi from 'swagger-ui-express';
 import swaggerDocs from './swagger';
-import path from 'path';
 import goalRoutes from './routes/financialGoalRoutes';
 import morgan from 'morgan';
+import authRoutes from './routes/authRoutes';
 
 const app: Application = express();
 
@@ -15,7 +19,6 @@ app.use(express.json());
 
 app.use(morgan(':method :url :status :response-time ms'));
 
-
 // DB
 connectDB();
 
@@ -24,9 +27,10 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // routes
 app.use('/goals', goalRoutes);
+app.use('/auth', authRoutes);
 
 // static files
-app.use(express.static(path.join(__dirname, '..', 'frontEnd')));
+app.use(express.static(path.join(__dirname, '..', '..', 'frontEnd')));
 
 // server
 app.listen(3000, () => {
