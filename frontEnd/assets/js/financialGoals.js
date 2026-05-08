@@ -1,5 +1,19 @@
 const API = '/goals';
 
+// Show/hide nav links based on token
+    const token = localStorage.getItem('token');
+    if (token) {
+      document.getElementById('loginLink').style.display = 'none';
+      document.getElementById('registerLink').style.display = 'none';
+      document.getElementById('logoutLink').style.display = 'inline';
+    }
+
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = 'login.html';
+    }
+
 // CREATE
 async function createGoal() {
   const data = {
