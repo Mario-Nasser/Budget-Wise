@@ -1,20 +1,22 @@
-import { FinancialGoal, GoalData } from '../classes/financialGoal';
-import FinancialGoalModel from '../models/financialGoalModel';
-import { v4 as uuidv4 } from 'uuid';
+import { FinancialGoal, GoalData } from "../classes/financialGoal";
+import FinancialGoalModel from "../models/financialGoalModel";
+import { v4 as uuidv4 } from "uuid";
 
 class FinancialGoalService {
-
   static async createGoal(data: any) {
     const goal = new FinancialGoal({
       goalId: uuidv4(),
-      ...data
+      ...data,
     });
 
     return await FinancialGoalModel.create(goal.getData());
   }
 
-  static async getGoal(goalId: string) {
-    const data: GoalData | null = await FinancialGoalModel.findOne({ goalId });
+  static async getGoal(goalId: string, userId: string) {
+    const data: GoalData | null = await FinancialGoalModel.findOne({
+      goalId,
+      userId,
+    });
 
     if (!data) throw new Error("Goal not found");
 
@@ -22,8 +24,11 @@ class FinancialGoalService {
     return goal.getFullDetails();
   }
 
-  static async updateProgress(goalId: string, amount: number) {
-    const data: GoalData | null = await FinancialGoalModel.findOne({ goalId });
+  static async updateProgress(goalId: string, amount: number, userId: string) {
+    const data: GoalData | null = await FinancialGoalModel.findOne({
+      goalId,
+      userId,
+    });
 
     if (!data) throw new Error("Goal not found");
 
@@ -32,14 +37,16 @@ class FinancialGoalService {
 
     await FinancialGoalModel.updateOne(
       { goalId },
-      { currentAmount: goal.getData().currentAmount }
+      { currentAmount: goal.getData().currentAmount },
     );
 
     return goal.getFullDetails();
   }
 
-  static async getAllGoals() {
-    const goals: GoalData[] | null = await FinancialGoalModel.find();
+  static async getAllGoals(userId: string) {
+    const goals: GoalData[] | null = await FinancialGoalModel.find({
+      userId,
+    });
 
     if (!goals) throw new Error("No goals found");
 

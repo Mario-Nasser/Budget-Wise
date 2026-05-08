@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BudgetWise - Transactions & Goals</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="assets/css/index.css">
+    <style>
+        nav {
+            background: #4caf50;
+            padding: 10px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        section {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        hr {
+            border: 0;
+            height: 1px;
+            background: #eee;
+            margin: 40px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+    <a href="index.html">Financial Goals</a>
+    <a href="report.html">Report</a>
+    <a href="addTransaction.html">Add Transaction</a>
+    <span id="userInfo" style="color: white; margin-right: auto; display: none;"></span>
+    <a href="login.html" id="loginLink">Login</a>
+        <a href="register.html" id="registerLink">Register</a>
+    <a href="login.html" id="logoutLink" onclick="logout()">Logout</a>
+  </nav>
+
+    <div class="container">
+        <h1>Budget Management System</h1>
+        
+        <!-- TRANSACTIONS SECTION -->
+        <section id="transactions-section">
+            <h2>Transaction Management</h2>
+            
+            <div id="auth-section" style="margin-bottom: 20px;">
+                <h3>Current JWT Token</h3>
+                <input type="text" id="token" placeholder="Paste your JWT Token here" style="width: 80%;">
+                <button onclick="saveToken()">Save Token</button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <h3>Add Category</h3>
+                    <form id="category-form">
+                        <input type="text" id="cat-name" placeholder="Category Name" required>
+                        <select id="cat-type">
+                            <option value="expense">Expense</option>
+                            <option value="income">Income</option>
+                        </select>
+                        <button type="submit">Create Category</button>
+                    </form>
+                </div>
+
+                <div>
+                    <h3>Add Transaction</h3>
+                    <form id="transaction-form">
+                        <input type="number" id="trans-amount" placeholder="Amount" step="0.01" required>
+                        <select id="trans-type" onchange="toggleTransactionFields()">
+                            <option value="Expense">Expense</option>
+                            <option value="Income">Income</option>
+                        </select>
+                        <select id="trans-category" required>
+                            <option value="">Select Category</option>
+                        </select>
+                        <input type="text" id="trans-source" placeholder="Source (for Income)" style="display:none">
+                        <input type="text" id="trans-desc" placeholder="Description">
+                        <button type="submit">Add Transaction</button>
+                    </form>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <h3>Recent History</h3>
+                <button onclick="fetchData()">Refresh Data</button>
+                <div id="display-area">
+                    <p>Loading data...</p>
+                </div>
+            </div>
+        </section>
+
+    <!-- Scripts -->
+    <script src="app.js"></script>
+    <script src="assets/js/index.js"></script>
+    <script>
+        // Auth Management
+        const token = localStorage.getItem('token');
+        const userJson = localStorage.getItem('user');
+        
+        if (token) {
+            document.getElementById('loginLink').style.display = 'none';
+            document.getElementById('registerLink').style.display = 'none';
+            document.getElementById('logoutLink').style.display = 'inline';
+            
+            // Sync with existing token field if empty
+            if (!document.getElementById('token').value) {
+                document.getElementById('token').value = token;
+            }
+
+            if (userJson) {
+                const user = JSON.parse(userJson);
+                const info = document.getElementById('userInfo');
+                info.textContent = `Welcome, ${user.name}`;
+                info.style.display = 'inline';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
+
+        // Auto-load data if token exists
+        window.onload = () => {
+            if (token) {
+                getAllGoals();
+                // fetchData(); // Existing app.js might handle this or require button click
+            }
+        };
+    </script>
+</body>
+</html>

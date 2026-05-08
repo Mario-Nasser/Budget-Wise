@@ -1,5 +1,6 @@
 export interface GoalData {
   goalId: string;
+  userId: string;
   goalName: string;
   targetAmount: number;
   currentAmount: number;
@@ -50,6 +51,7 @@ export class FinancialGoal {
   getData() {
     return {
       goalId: this.goalId,
+      userId: this.goalData.userId,
       goalName: this.goalName,
       targetAmount: this.targetAmount,
       currentAmount: this.currentAmount,

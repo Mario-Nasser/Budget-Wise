@@ -1,15 +1,16 @@
 import dotenv from 'dotenv';
 import path from 'path';
 dotenv.config({ path: path.join(__dirname, '.env') });
-
 import express, { Application } from 'express';
 import cors from 'cors';
 import connectDB from './config/db';
 import swaggerUi from 'swagger-ui-express';
 import swaggerDocs from './swagger';
 import goalRoutes from './routes/financialGoalRoutes';
+import reportRoutes from './routes/reportRoutes';
 import morgan from 'morgan';
 import authRoutes from './routes/authRoutes';
+import transactionRoutes from './routes/transactionRoutes';
 
 const app: Application = express();
 
@@ -26,11 +27,17 @@ connectDB();
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // routes
+
 app.use('/goals', goalRoutes);
+app.use('/reports', reportRoutes);
+app.use('/transactions', transactionRoutes);
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../frontEnd/login.html'));
+});
 app.use('/auth', authRoutes);
 
-// static files
-app.use(express.static(path.join(__dirname, '..', '..', 'frontEnd')));
+// static files - serve from root frontEnd directory
+app.use(express.static(path.join(__dirname, '../../frontEnd')));
 
 // server
 app.listen(3000, () => {

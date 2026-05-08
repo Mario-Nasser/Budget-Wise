@@ -3,7 +3,14 @@
  * tags:
  *   - name: Goals
  *     description: Financial goal management
+ *
  * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ *
  *   schemas:
  *     FinancialGoal:
  *       type: object
@@ -30,9 +37,14 @@
  *         - currentAmount
  *         - deadline
  *
+ * security:
+ *   - bearerAuth: []
+ *
  * /goals:
  *   post:
  *     tags: [Goals]
+ *     security:
+ *       - bearerAuth: []
  *     summary: Create a new financial goal
  *     requestBody:
  *       required: true
@@ -61,8 +73,11 @@
  *               $ref: '#/components/schemas/FinancialGoal'
  *       400:
  *         description: Invalid request
+ *
  *   get:
  *     tags: [Goals]
+ *     security:
+ *       - bearerAuth: []
  *     summary: Get all financial goals
  *     responses:
  *       200:
@@ -77,6 +92,8 @@
  * /goals/{id}:
  *   get:
  *     tags: [Goals]
+ *     security:
+ *       - bearerAuth: []
  *     summary: Get a specific financial goal by ID
  *     parameters:
  *       - in: path
@@ -97,6 +114,8 @@
  * /goals/{id}/progress:
  *   patch:
  *     tags: [Goals]
+ *     security:
+ *       - bearerAuth: []
  *     summary: Update progress for a goal
  *     parameters:
  *       - in: path
@@ -130,12 +149,13 @@
 
 import express from 'express';
 import * as controller from '../controllers/financialGoalController';
+import { verifyToken } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
-router.post('/', controller.createGoal);
-router.get('/', controller.getAllGoals);
-router.get('/:id', controller.getGoal);
-router.patch('/:id/progress', controller.updateProgress);
+router.post('/', verifyToken, controller.createGoal);
+router.get('/', verifyToken, controller.getAllGoals);
+router.get('/:id', verifyToken, controller.getGoal);
+router.patch('/:id/progress', verifyToken, controller.updateProgress);
 
 export default router;
