@@ -1,4 +1,4 @@
-const API = 'http://localhost:3000/auth';
+const API = '/auth';
 
 // ===== Helpers =====
 function showFieldError(id, msg) {
@@ -123,8 +123,7 @@ async function login() {
     });
     const data = await res.json();
 
-    if (res.ok && data.token) {
-      localStorage.setItem('token', data.token);
+    if (res.ok) {
       localStorage.setItem('user', JSON.stringify(data.user));
       setAlert('loginAlert', 'Login successful! Redirecting...', 'success');
       setTimeout(() => window.location.href = 'index.html', 1000);

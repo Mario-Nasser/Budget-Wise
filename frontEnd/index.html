@@ -48,7 +48,7 @@
         <a href="addTransaction.html">Add Transaction</a>
         <a href="login.html" id="loginLink">Login</a>
         <a href="register.html" id="registerLink">Register</a>
-        <a href="#" id="logoutLink" onclick="logout()" style="display:none">Logout</a>
+        <a href="#" id="logoutLink" onclick="handleLogout()" style="display:none">Logout</a>
     </nav>
 
     <div class="container">
@@ -58,12 +58,6 @@
         <section id="transactions-section">
             <h2>Transaction Management</h2>
             
-            <div id="auth-section" style="margin-bottom: 20px;">
-                <h3>Current JWT Token</h3>
-                <input type="text" id="token" placeholder="Paste your JWT Token here" style="width: 80%;">
-                <button onclick="saveToken()">Save Token</button>
-            </div>
-
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                 <div>
                     <h3>Add Category</h3>
@@ -73,6 +67,7 @@
                             <option value="expense">Expense</option>
                             <option value="income">Income</option>
                         </select>
+                        <input type="number" id="cat-limit" placeholder="Monthly Limit ($)" step="0.01">
                         <button type="submit">Create Category</button>
                     </form>
                 </div>
@@ -112,9 +107,9 @@
             
             <div style="margin-bottom: 20px;">
                 <h3>Create New Goal</h3>
-                <input id="name" placeholder="Goal Name">
-                <input id="target" type="number" placeholder="Target Amount">
-                <input id="deadline" type="date">
+                <input id="goal-name" placeholder="Goal Name">
+                <input id="goal-target" type="number" placeholder="Target Amount">
+                <input id="goal-deadline" type="date">
                 <button onclick="createGoal()">Create Goal</button>
             </div>
 
@@ -130,37 +125,40 @@
     <script src="app.js"></script>
     <script src="assets/js/financialGoals.js"></script>
     <script>
-        // Auth Management
-        const token = localStorage.getItem('token');
+        // Auth UI Management
         const userJson = localStorage.getItem('user');
         
-        if (token) {
+        if (userJson) {
             document.getElementById('loginLink').style.display = 'none';
             document.getElementById('registerLink').style.display = 'none';
             document.getElementById('logoutLink').style.display = 'inline';
             
-            // Sync with existing token field if empty
-            if (document.getElementById('token') && !document.getElementById('token').value) {
-                document.getElementById('token').value = token;
-            }
+            const user = JSON.parse(userJson);
+            const info = document.getElementById('userInfo');
+            info.textContent = `Welcome, ${user.name}`;
+            info.style.display = 'inline';
+        } else if (window.location.pathname.includes('index.html')) {
+             // Redirect to login if no user data (though server should handle cookie check)
+             // window.location.href = 'login.html';
+        }
 
-            if (userJson) {
-                const user = JSON.parse(userJson);
-                const info = document.getElementById('userInfo');
-                info.textContent = `Welcome, ${user.name}`;
-                info.style.display = 'inline';
+        async function handleLogout() {
+            try {
+                await fetch('/auth/logout', { method: 'POST' });
+                localStorage.removeItem('user');
+                window.location.href = 'login.html';
+            } catch (err) {
+                console.error('Logout failed', err);
+                localStorage.removeItem('user');
+                window.location.href = 'login.html';
             }
         }
 
-        function logout() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = 'login.html';
-        }
-
-        // Auto-load data if token exists
+        // Auto-load data
         window.onload = () => {
-            if (token) {
+            if (userJson) {
+                fetchCategories();
+                fetchData();
                 if (typeof getAllGoals === 'function') getAllGoals();
             }
         };

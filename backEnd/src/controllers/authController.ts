@@ -85,6 +85,7 @@ export const register = async (req: Request, res: Response) => {
       user: userWithoutPassword,
     });
   } catch (error) {
+    console.error("Register Error:", error);
     return res.status(500).json({ message: "Server Error" });
   }
 };
@@ -133,22 +134,28 @@ export const login = async (req: Request, res: Response) => {
       { expiresIn },
     );
 
-    console.log(token);
+    // 7. Set token in cookie
+    res.cookie("token", token, {
+      httpOnly: true, // Not accessible by frontend JS
+      secure: process.env.NODE_ENV === "production", // Only over HTTPS in production
+      sameSite: "strict",
+      maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000,
+    });
 
     const { password: _, ...userWithoutPassword } = user.toObject();
 
     return res.status(200).json({
       message: "Login successful",
-      token,
       user: userWithoutPassword,
     });
   } catch (error) {
+    console.error("Login Error:", error);
     return res.status(500).json({ message: "Server Error" });
   }
 };
 
 // ===== LOGOUT =====
 export const logout = (_req: Request, res: Response) => {
-  // In production: add token to a Redis blacklist here
+  res.clearCookie("token");
   return res.status(200).json({ message: "Logged out successfully" });
 };

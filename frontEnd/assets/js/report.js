@@ -47,6 +47,7 @@ async function loadChart() {
             `${API}?startDate=${startDate.value}&endDate=${endDate.value}&pattern=${pattern.value}`,
             {
                 method: 'GET',
+                credentials: 'include',
                 headers: {}
             }
         );

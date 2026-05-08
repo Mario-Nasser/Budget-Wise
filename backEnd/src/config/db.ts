@@ -19,17 +19,13 @@ dotenv.config();
 const connectDB = async (): Promise<void> => {
     try {
         const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/financeDB';
+        console.log('Attempting to connect to MongoDB with URI:', uri.split('@')[1] ? '***@' + uri.split('@')[1] : uri);
 
         const connection = await mongoose.connect(uri, {
             serverSelectionTimeoutMS: 10000,
         });
 
         console.log(`MongoDB Connected: ${connection.connection.host}`);
-
-        // Optional: seed default data
-        if (Category?.seedDefaultCategories) {
-            await Category.seedDefaultCategories();
-        }
 
     } catch (error) {
         console.error(

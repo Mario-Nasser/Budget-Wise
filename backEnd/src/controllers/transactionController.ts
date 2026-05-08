@@ -42,7 +42,7 @@ const transactionController = {
 
       const userId = (req as any).user.id;
 
-      const { savedTransaction, newBalance } =
+      const { savedTransaction, newBalance, nearLimit, categoryName } =
         await transactionService.addTransaction(
           userId,
           amount,
@@ -65,6 +65,7 @@ const transactionController = {
           description: savedTransaction.description,
           newBalance,
         },
+        warning: nearLimit ? `Warning: You have reached 90% of your limit for the ${categoryName} category!` : null,
       });
     } catch (error) {
       res.status(400).json({
@@ -179,12 +180,13 @@ const transactionController = {
   createCategory: async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = (req as any).user.id;
-      const { name, type } = req.body;
+      const { name, type, limit } = req.body;
 
       const category = await transactionService.createCategory(
         userId,
         name,
         type,
+        limit
       );
 
       res.status(201).json({

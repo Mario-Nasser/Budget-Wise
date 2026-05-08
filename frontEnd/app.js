@@ -1,20 +1,10 @@
-const API_URL = '/api/transactions';
-let AUTH_TOKEN = localStorage.getItem('token') || '';
+const API_URL = '/transactions';
 let categories = [];
 
-function saveToken() {
-    AUTH_TOKEN = document.getElementById('token').value;
-    localStorage.setItem('token', AUTH_TOKEN);
-    fetchCategories(); // Re-fetch categories when token is saved
-    fetchData();       // Re-fetch transactions
-    alert('Token saved!');
-}
-
 async function fetchCategories() {
-    if (!AUTH_TOKEN) return;
     try {
         const response = await fetch(`${API_URL}/categories`, {
-            headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` }
+            credentials: 'include'
         });
         const result = await response.json();
         if (result.data) {
@@ -42,7 +32,7 @@ function populateCategorySelects() {
         .forEach(cat => {
             const option = document.createElement('option');
             option.value = cat._id;
-            option.textContent = cat.name;
+            option.textContent = cat.name + (cat.limit > 0 ? ` (Limit: $${cat.limit})` : '');
             transCatSelect.appendChild(option);
         });
         
@@ -67,9 +57,8 @@ function toggleTransactionFields() {
 }
 
 async function fetchData() {
-    if (!AUTH_TOKEN) return;
     const response = await fetch(API_URL, {
-        headers: { 'Authorization': `Bearer ${AUTH_TOKEN}` }
+        credentials: 'include'
     });
     const result = await response.json();
     const display = document.getElementById('display-area');
@@ -103,20 +92,25 @@ document.getElementById('transaction-form').onsubmit = async (e) => {
     const res = await fetch(API_URL, {
         method: 'POST',
         headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${AUTH_TOKEN}` 
+            'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify(data)
     });
 
+    const result = await res.json();
+
     if (res.ok) {
-        alert('Transaction added!');
+        if (result.warning) {
+            alert(result.warning); // Show popup alert if near limit
+        } else {
+            alert('Transaction added!');
+        }
         fetchData();
         e.target.reset();
         toggleTransactionFields();
     } else {
-        const err = await res.json();
-        alert('Error: ' + (err.message || 'Error adding transaction'));
+        alert('Error: ' + (result.message || 'Error adding transaction'));
     }
 };
 
@@ -125,15 +119,16 @@ document.getElementById('category-form').onsubmit = async (e) => {
     e.preventDefault();
     const data = {
         name: document.getElementById('cat-name').value,
-        type: document.getElementById('cat-type').value
+        type: document.getElementById('cat-type').value,
+        limit: document.getElementById('cat-limit').value
     };
 
     const res = await fetch(`${API_URL}/categories`, {
         method: 'POST',
         headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${AUTH_TOKEN}` 
+            'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify(data)
     });
 
@@ -146,9 +141,3 @@ document.getElementById('category-form').onsubmit = async (e) => {
         alert('Error: ' + (err.message || 'Error creating category'));
     }
 };
-
-// Initial load
-if (AUTH_TOKEN) {
-    fetchCategories();
-    fetchData();
-}
