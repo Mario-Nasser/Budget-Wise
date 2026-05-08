@@ -2,6 +2,11 @@ import mongoose from 'mongoose';
 
 const FinancialGoalSchema = new mongoose.Schema({
   goalId: { type: String, unique: true },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
   goalName: String,
   targetAmount: Number,
   currentAmount: Number,
@@ -9,4 +14,3 @@ const FinancialGoalSchema = new mongoose.Schema({
 });
 
 export default mongoose.model('FinancialGoal', FinancialGoalSchema);
-  

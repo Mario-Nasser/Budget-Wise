@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BudgetWise - Transactions & Goals</title>
-    <link rel="stylesheet" href="./assets/css/nav.css">
-    <link rel="stylesheet" href="./assets/css/index.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="assets/css/index.css">
     <style>
         nav {
             background: #4caf50;
@@ -41,15 +41,16 @@
     </style>
 </head>
 <body>
+
     <nav>
-        <span id="userInfo" style="color: white; margin-right: auto; display: none;"></span>
-        <a href="index.html">Financial Goals</a>
-        <a href="report.html">Report</a>
-        <a href="addTransaction.html">Add Transaction</a>
-        <a href="login.html" id="loginLink">Login</a>
+    <a href="index.html">Financial Goals</a>
+    <a href="report.html">Report</a>
+    <a href="addTransaction.html">Add Transaction</a>
+    <span id="userInfo" style="color: white; margin-right: auto; display: none;"></span>
+    <a href="login.html" id="loginLink">Login</a>
         <a href="register.html" id="registerLink">Register</a>
-        <a href="#" id="logoutLink" onclick="logout()" style="display:none">Logout</a>
-    </nav>
+    <a href="login.html" id="logoutLink" onclick="logout()">Logout</a>
+  </nav>
 
     <div class="container">
         <h1>Budget Management System</h1>
@@ -104,31 +105,9 @@
             </div>
         </section>
 
-        <hr>
-
-        <!-- GOALS SECTION -->
-        <section id="goals-section">
-            <h2>Financial Goals</h2>
-            
-            <div style="margin-bottom: 20px;">
-                <h3>Create New Goal</h3>
-                <input id="name" placeholder="Goal Name">
-                <input id="target" type="number" placeholder="Target Amount">
-                <input id="deadline" type="date">
-                <button onclick="createGoal()">Create Goal</button>
-            </div>
-
-            <div>
-                <h3>All Goals</h3>
-                <button onclick="getAllGoals()">Load Goals</button>
-                <div id="goals" style="margin-top: 15px;"></div>
-            </div>
-        </section>
-    </div>
-
     <!-- Scripts -->
     <script src="app.js"></script>
-    <script src="assets/js/financialGoals.js"></script>
+    <script src="assets/js/index.js"></script>
     <script>
         // Auth Management
         const token = localStorage.getItem('token');
@@ -140,7 +119,7 @@
             document.getElementById('logoutLink').style.display = 'inline';
             
             // Sync with existing token field if empty
-            if (document.getElementById('token') && !document.getElementById('token').value) {
+            if (!document.getElementById('token').value) {
                 document.getElementById('token').value = token;
             }
 
@@ -161,7 +140,8 @@
         // Auto-load data if token exists
         window.onload = () => {
             if (token) {
-                if (typeof getAllGoals === 'function') getAllGoals();
+                getAllGoals();
+                // fetchData(); // Existing app.js might handle this or require button click
             }
         };
     </script>
