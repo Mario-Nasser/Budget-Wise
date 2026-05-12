@@ -1,9 +1,9 @@
-import { Schema } from 'mongoose';
+import { Schema, Types } from 'mongoose';
 import Transaction, { ITransaction } from './Transaction';
 
 export interface IIncome extends ITransaction {
     source: string;
-    category?: Schema.Types.ObjectId;
+    category?: Types.ObjectId;
 }
 
 const incomeSchema = new Schema<IIncome>({

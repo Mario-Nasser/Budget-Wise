@@ -6,6 +6,7 @@ export const generateReport = async (req: Request, res: Response) => {
     const { startDate, endDate, pattern } = req.query;
 
     const report = await ReportService.getReport(
+      (req as any).user.id,
       {
         startDate: startDate as string,
         endDate: endDate as string,

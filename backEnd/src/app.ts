@@ -13,13 +13,10 @@ import morgan from 'morgan';
 import authRoutes from './routes/authRoutes';
 import transactionRoutes from './routes/transactionRoutes';
 
-const app: Application = express();
+export const app: Application = express();
 
 // middleware
-app.use(cors({
-    origin: true, // Allows the current origin
-    credentials: true
-}));
+app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 
@@ -45,7 +42,6 @@ app.use('/auth', authRoutes);
 app.use(express.static(path.join(__dirname, '../../frontEnd')));
 
 // server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.listen(3000, () => {
+  console.log('Server running on port 3000');
 });

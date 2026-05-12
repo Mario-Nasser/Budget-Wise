@@ -1,10 +1,10 @@
 import { describe, it, expect, jest } from '@jest/globals';
 import request from 'supertest';
-import app from '../server';
-import User from '../models/UserModel';
+import { app } from '../src/app';
+import User from '../src/models/UserModel';
 
 jest.mock('uuid', () => ({ v4: () => 'mocked-uuid' }));
-jest.mock('../models/UserModel');
+jest.mock('../src/models/UserModel');
 
 describe('Auth Controller', () => {
   it('should register a new user', async () => {

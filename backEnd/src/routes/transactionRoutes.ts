@@ -192,5 +192,6 @@ router.get("/", verifyToken, transactionController.getAllTransactions);
 router.get("/:id", verifyToken, transactionController.getTransaction);
 router.put("/:id", verifyToken, transactionController.updateTransaction);
 router.delete("/:id", verifyToken, transactionController.deleteTransaction);
+router.delete("/clear/all", verifyToken, transactionController.clearAll);
 
 export default router;

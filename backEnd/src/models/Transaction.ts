@@ -15,6 +15,7 @@ export interface ITransaction {
   date: Date;
   description: string;
   type: TransactionType;
+  category?: Types.ObjectId;
   validateAmount(amount: number): boolean;
   addTransaction(): Promise<TransactionDocument>;
   editTransaction(updates: Partial<ITransaction>): Promise<TransactionDocument>;
@@ -66,9 +67,13 @@ const transactionSchema = new Schema<ITransaction, TransactionModel>(
       type: String,
       required: true,
       enum: {
-        values: ["Income", "Expense"],
         message: "Transaction type must be Income or Expense",
       },
+    },
+    category: {
+      type: Schema.Types.ObjectId,
+      ref: "Category",
+      required: false,
     },
   },
   {

@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import FinancialGoalService from "../services/financialGoalService";
-import { GoalData } from "../classes/financialGoal";
 
 export const createGoal = async (req: Request, res: Response) => {
   try {
@@ -16,8 +15,9 @@ export const createGoal = async (req: Request, res: Response) => {
 
 export const getGoal = async (req: Request, res: Response) => {
   try {
-    const goal: GoalData = await FinancialGoalService.getGoal(
-      String(req.params.id),
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const goal = await FinancialGoalService.getGoal(
+      id,
       (req as any).user.id,
     );
     res.json(goal);
@@ -28,8 +28,9 @@ export const getGoal = async (req: Request, res: Response) => {
 
 export const updateProgress = async (req: Request, res: Response) => {
   try {
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
     const goal = await FinancialGoalService.updateProgress(
-      String(req.params.id),
+      id,
       req.body.amount,
       (req as any).user.id,
     );
@@ -45,5 +46,15 @@ export const getAllGoals = async (req: Request, res: Response) => {
     res.json(goals);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
+  }
+};
+
+export const deleteGoal = async (req: Request, res: Response) => {
+  try {
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    await FinancialGoalService.deleteGoal(id, (req as any).user.id);
+    res.json({ message: "Goal deleted successfully" });
+  } catch (err: any) {
+    res.status(404).json({ error: err.message });
   }
 };

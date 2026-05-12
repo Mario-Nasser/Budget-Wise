@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import User from "../models/userModel";
+import User from "../models/UserModel";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
@@ -85,7 +85,6 @@ export const register = async (req: Request, res: Response) => {
       user: userWithoutPassword,
     });
   } catch (error) {
-    console.error("Register Error:", error);
     return res.status(500).json({ message: "Server Error" });
   }
 };
@@ -134,22 +133,23 @@ export const login = async (req: Request, res: Response) => {
       { expiresIn },
     );
 
-    // 7. Set token in cookie
-    res.cookie("token", token, {
-      httpOnly: true, // Not accessible by frontend JS
-      secure: process.env.NODE_ENV === "production", // Only over HTTPS in production
-      sameSite: "strict",
-      maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000,
-    });
+    console.log(token);
 
     const { password: _, ...userWithoutPassword } = user.toObject();
 
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000,
+      sameSite: "strict",
+    });
+
     return res.status(200).json({
       message: "Login successful",
+      token, // still return it for compatibility if needed
       user: userWithoutPassword,
     });
   } catch (error) {
-    console.error("Login Error:", error);
     return res.status(500).json({ message: "Server Error" });
   }
 };

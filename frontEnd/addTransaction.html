@@ -1,149 +1,240 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BudgetWise - Transactions & Goals</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="assets/css/index.css">
-    <style>
-        nav {
-            background: #4caf50;
-            padding: 10px;
-            display: flex;
-            justify-content: flex-end;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        nav a {
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        section {
-            background: #f9f9f9;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        hr {
-            border: 0;
-            height: 1px;
-            background: #eee;
-            margin: 40px 0;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Budget-Wise | Transactions</title>
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    .transaction-item {
+      padding: 1rem;
+      border-radius: 8px;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      margin-bottom: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .transaction-item.Expense { border-left: 4px solid var(--error); }
+    .transaction-item.Income { border-left: 4px solid var(--success); }
+
+    .category-badge {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background: #ecfdf5;
+      color: #065f46;
+      font-weight: 600;
+    }
+  </style>
 </head>
 <body>
-
-    <nav>
-    <a href="index.html">Financial Goals</a>
-    <a href="report.html">Report</a>
-    <a href="addTransaction.html">Add Transaction</a>
-    <span id="userInfo" style="color: white; margin-right: auto; display: none;"></span>
-    <a href="login.html" id="loginLink">Login</a>
-        <a href="register.html" id="registerLink">Register</a>
-    <a href="login.html" id="logoutLink" onclick="logout()">Logout</a>
+  <nav>
+    <div class="nav-brand">Budget-Wise</div>
+    <ul class="nav-links">
+      <li><a href="index.html">Financial Goals</a></li>
+      <li><a href="addTransaction.html" class="active">Transactions</a></li>
+      <li><a href="report.html">Reports</a></li>
+    </ul>
+    <div style="display: flex; gap: 1rem; align-items: center;">
+      <span id="nav-user-name" style="color: var(--text-muted); font-size: 0.875rem;"></span>
+      <button onclick="handleLogout()" class="btn btn-primary" style="padding: 0.5rem 1rem;">Logout</button>
+    </div>
   </nav>
 
-    <div class="container">
-        <h1>Budget Management System</h1>
-        
-        <!-- TRANSACTIONS SECTION -->
-        <section id="transactions-section">
-            <h2>Transaction Management</h2>
-            
-            <div id="auth-section" style="margin-bottom: 20px;">
-                <h3>Current JWT Token</h3>
-                <input type="text" id="token" placeholder="Paste your JWT Token here" style="width: 80%;">
-                <button onclick="saveToken()">Save Token</button>
+  <div class="container">
+    <div class="grid grid-2">
+      <!-- Forms Section -->
+      <div class="animate-fade-in">
+        <!-- Add Category -->
+        <div class="glass-card" style="padding: 2rem; margin-bottom: 2rem;">
+          <h2 style="margin-bottom: 1.5rem;">Add Category</h2>
+          <form id="categoryForm">
+            <div class="form-group">
+              <label>Category Name</label>
+              <input type="text" id="catName" placeholder="e.g. Food" required>
             </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                <div>
-                    <h3>Add Category</h3>
-                    <form id="category-form">
-                        <input type="text" id="cat-name" placeholder="Category Name" required>
-                        <select id="cat-type">
-                            <option value="expense">Expense</option>
-                            <option value="income">Income</option>
-                        </select>
-                        <button type="submit">Create Category</button>
-                    </form>
-                </div>
-
-                <div>
-                    <h3>Add Transaction</h3>
-                    <form id="transaction-form">
-                        <input type="number" id="trans-amount" placeholder="Amount" step="0.01" required>
-                        <select id="trans-type" onchange="toggleTransactionFields()">
-                            <option value="Expense">Expense</option>
-                            <option value="Income">Income</option>
-                        </select>
-                        <select id="trans-category" required>
-                            <option value="">Select Category</option>
-                        </select>
-                        <input type="text" id="trans-source" placeholder="Source (for Income)" style="display:none">
-                        <input type="text" id="trans-desc" placeholder="Description">
-                        <button type="submit">Add Transaction</button>
-                    </form>
-                </div>
+            <div class="form-group">
+              <label>Type</label>
+              <select id="catType">
+                <option value="expense">Expense</option>
+                <option value="income">Income</option>
+              </select>
             </div>
-
-            <div style="margin-top: 30px;">
-                <h3>Recent History</h3>
-                <button onclick="fetchData()">Refresh Data</button>
-                <div id="display-area">
-                    <p>Loading data...</p>
-                </div>
+            <div class="form-group">
+              <label>Monthly Spending Limit ($)</label>
+              <input type="number" id="catLimit" step="0.01" placeholder="0.00 (Optional)">
+              <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Set a monthly limit to receive warnings when you spend too much.</p>
             </div>
-        </section>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Create Category</button>
+          </form>
+        </div>
 
-    <!-- Scripts -->
-    <script src="app.js"></script>
-    <script src="assets/js/index.js"></script>
-    <script>
-        // Auth Management
-        const token = localStorage.getItem('token');
-        const userJson = localStorage.getItem('user');
-        
-        if (token) {
-            document.getElementById('loginLink').style.display = 'none';
-            document.getElementById('registerLink').style.display = 'none';
-            document.getElementById('logoutLink').style.display = 'inline';
-            
-            // Sync with existing token field if empty
-            if (!document.getElementById('token').value) {
-                document.getElementById('token').value = token;
-            }
+        <!-- Add Transaction -->
+        <div class="glass-card" style="padding: 2rem;">
+          <h2 style="margin-bottom: 1.5rem;">New Transaction</h2>
+          <form id="transactionForm">
+            <div class="form-group">
+              <label>Amount ($)</label>
+              <input type="number" id="amount" step="0.01" placeholder="0.00" required>
+            </div>
+            <div class="form-group">
+              <label>Type</label>
+              <select id="type" onchange="updateCategories()">
+                <option value="Expense">Expense</option>
+                <option value="Income">Income</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Category</label>
+              <select id="category" required>
+                <option value="">Select Category</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <input type="text" id="desc" placeholder="Optional notes">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Add Transaction</button>
+          </form>
+        </div>
+      </div>
 
-            if (userJson) {
-                const user = JSON.parse(userJson);
-                const info = document.getElementById('userInfo');
-                info.textContent = `Welcome, ${user.name}`;
-                info.style.display = 'inline';
-            }
+      <!-- History Section -->
+      <div class="animate-fade-in" style="animation-delay: 0.1s;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+          <h2>Recent History</h2>
+          <div style="display: flex; gap: 0.5rem;">
+            <button onclick="handleClearAll()" class="btn" style="background: rgba(239, 68, 68, 0.1); color: #fca5a5; border: 1px solid var(--error);">Clear All Data</button>
+            <button onclick="loadHistory()" class="btn" style="background: rgba(255,255,255,0.05); color: var(--text);">Refresh</button>
+          </div>
+        </div>
+        <div id="historyList">
+          <p style="color: var(--text-muted);">Loading transactions...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/api.js"></script>
+  <script>
+    if (!localStorage.getItem('token')) window.location.href = 'login.html';
+
+    let allCategories = [];
+
+    async function loadCategories() {
+      try {
+        const res = await api.transactions.categories.getAll();
+        allCategories = res.data || [];
+        updateCategories();
+      } catch (err) {
+        console.error('Error loading categories:', err);
+      }
+    }
+
+    function updateCategories() {
+      const type = document.getElementById('type').value.toLowerCase();
+      const select = document.getElementById('category');
+      const filtered = allCategories.filter(c => c.type === type);
+
+      select.innerHTML = '<option value="">Select Category</option>';
+      filtered.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c._id;
+        opt.textContent = c.name;
+        select.appendChild(opt);
+      });
+    }
+
+    async function loadHistory() {
+      const listEl = document.getElementById('historyList');
+      try {
+        const res = await api.transactions.getAll();
+        const txs = res.data?.transactions || [];
+        listEl.innerHTML = '';
+
+        if (txs.length === 0) {
+          listEl.innerHTML = '<p style="color: var(--text-muted);">No transactions found.</p>';
+          return;
         }
 
-        function logout() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = 'login.html';
-        }
+        txs.forEach(t => {
+          const item = document.createElement('div');
+          item.className = `transaction-item ${t.type}`;
+          item.innerHTML = `
+            <div>
+              <div style="font-weight: 600;">$${t.amount.toFixed(2)}</div>
+              <div style="font-size: 0.8125rem; color: var(--text-muted);">${t.description || 'No description'}</div>
+            </div>
+            <div style="text-align: right;">
+              <div class="category-badge">${t.category?.name || 'Uncategorized'}</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">${new Date(t.date).toLocaleDateString()}</div>
+            </div>
+          `;
+          listEl.appendChild(item);
+        });
+      } catch (err) {
+        listEl.innerHTML = '<p style="color: var(--error);">Error loading history.</p>';
+      }
+    }
 
-        // Auto-load data if token exists
-        window.onload = () => {
-            if (token) {
-                getAllGoals();
-                // fetchData(); // Existing app.js might handle this or require button click
-            }
-        };
-    </script>
+    document.getElementById('categoryForm').onsubmit = async (e) => {
+      e.preventDefault();
+      try {
+        await api.transactions.categories.create({
+          name: document.getElementById('catName').value,
+          type: document.getElementById('catType').value,
+          limit: document.getElementById('catLimit').value
+        });
+        e.target.reset();
+        await loadCategories();
+        alert('Category created!');
+      } catch (err) {
+        alert(err.message || 'Error creating category');
+      }
+    };
+
+    document.getElementById('transactionForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const data = {
+        amount: Number(document.getElementById('amount').value),
+        type: document.getElementById('type').value,
+        categoryId: document.getElementById('category').value,
+        description: document.getElementById('desc').value,
+        date: new Date()
+      };
+
+      try {
+        const res = await api.transactions.create(data);
+        if (res.warning) alert(res.warning);
+        else alert('Transaction added!');
+        e.target.reset();
+        loadHistory();
+      } catch (err) {
+        alert(err.message || 'Error adding transaction');
+      }
+    };
+
+    async function handleClearAll() {
+      if (!confirm("Are you sure you want to clear all your transactions and custom categories? This cannot be undone.")) return;
+
+      try {
+        await api.transactions.clearAll();
+        alert('All data cleared successfully!');
+        await loadCategories();
+        await loadHistory();
+      } catch (err) {
+        alert(err.message || 'Error clearing data');
+      }
+    }
+
+    loadCategories();
+    loadHistory();
+  </script>
 </body>
 </html>

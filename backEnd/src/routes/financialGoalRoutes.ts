@@ -148,14 +148,21 @@
  */
 
 import express from 'express';
-import * as controller from '../controllers/financialGoalController';
+import {
+  createGoal,
+  getGoal,
+  updateProgress,
+  getAllGoals,
+  deleteGoal,
+} from "../controllers/financialGoalController";
 import { verifyToken } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
-router.post('/', verifyToken, controller.createGoal);
-router.get('/', verifyToken, controller.getAllGoals);
-router.get('/:id', verifyToken, controller.getGoal);
-router.patch('/:id/progress', verifyToken, controller.updateProgress);
+router.post('/', verifyToken, createGoal);
+router.get("/", verifyToken, getAllGoals);
+router.delete("/:id", verifyToken, deleteGoal);
+router.get('/:id', verifyToken, getGoal);
+router.patch('/:id/progress', verifyToken, updateProgress);
 
 export default router;

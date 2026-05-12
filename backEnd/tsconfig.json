@@ -8,9 +8,9 @@
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "typeRoots": ["./node_modules/@types", "./types"]
+    "moduleResolution": "bundler",
+    "ignoreDeprecations": "5.0",
+    "resolveJsonModule": true
   },
   "include": [
     "**/*.ts",

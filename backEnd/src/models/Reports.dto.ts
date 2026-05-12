@@ -10,6 +10,8 @@ export interface SpendingPattern {
 export interface Report {
   totalIncome: number;
   totalExpenses: number;
+  totalGoalSavings: number;
+  netBalance: number;
   expenseByCategory: ExpenseByCategory[];
   categoryChart: CategoryChart;
   spendingPattern: SpendingPattern[];

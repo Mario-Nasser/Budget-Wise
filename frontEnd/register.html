@@ -1,175 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Budget-Wise | Register</title>
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
     body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: #f0f0f0;
-      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: 40px 20px;
     }
-
-    .card {
-      background: #fff;
-      border-radius: 10px;
-      padding: 40px 36px;
+    .register-container {
       width: 100%;
-      max-width: 400px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-      border-top: 4px solid #4caf50;
-    }
-
-    .logo {
+      max-width: 480px;
+      padding: 3rem;
       text-align: center;
-      margin-bottom: 28px;
     }
-    .logo h1 { font-size: 22px; font-weight: 700; color: #222; }
-    .logo span { color: #4caf50; }
-    .logo p { color: #888; font-size: 13px; margin-top: 4px; }
-
-    .form-group { margin-bottom: 16px; }
-
-    label {
-      display: block;
-      font-size: 13px;
-      font-weight: 600;
-      color: #444;
-      margin-bottom: 6px;
+    .brand {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(to right, #059669, #10b981);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
-
-    input[type="text"],
-    input[type="email"],
-    input[type="password"] {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1.5px solid #ddd;
-      border-radius: 6px;
-      font-size: 14px;
-      color: #333;
-      background: #fafafa;
-      transition: border-color 0.2s;
-      font-family: inherit;
+    .subtitle {
+      color: var(--text-muted);
+      margin-bottom: 2.5rem;
     }
-    input:focus {
-      outline: none;
-      border-color: #4caf50;
-      background: #fff;
+    .footer-link {
+      margin-top: 2rem;
+      color: var(--text-muted);
+      font-size: 0.875rem;
     }
-
-    .field-error {
-      color: #e53935;
-      font-size: 12px;
-      margin-top: 4px;
-      display: none;
-    }
-
-    /* Password Strength */
-    .strength-bar {
-      height: 4px;
-      background: #e0e0e0;
-      border-radius: 2px;
-      margin-top: 8px;
-      overflow: hidden;
-    }
-    .strength-fill {
-      height: 100%;
-      width: 0;
-      border-radius: 2px;
-      transition: width 0.3s, background 0.3s;
-    }
-    .strength-text {
-      font-size: 11px;
-      margin-top: 3px;
-      min-height: 15px;
+    .footer-link a {
+      color: var(--primary);
+      text-decoration: none;
       font-weight: 600;
     }
-
-    .btn {
-      width: 100%;
-      padding: 11px;
-      background: #4caf50;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background 0.2s;
-      font-family: inherit;
-      margin-top: 4px;
-    }
-    .btn:hover    { background: #43a047; }
-    .btn:disabled { background: #a5d6a7; cursor: not-allowed; }
-
-    .alert {
-      padding: 10px 14px;
-      border-radius: 6px;
-      font-size: 13px;
-      margin-bottom: 16px;
-      display: none;
-    }
-    .alert.error   { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
-    .alert.success { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
-
-    .switch-link {
-      text-align: center;
-      margin-top: 16px;
-      font-size: 13px;
-      color: #777;
-    }
-    .switch-link a { color: #4caf50; font-weight: 600; text-decoration: none; }
-    .switch-link a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <div class="logo">
-      <h1><span>Budget</span>-Wise</h1>
-      <p>Create your account</p>
-    </div>
+  <div class="register-container glass-card animate-fade-in">
+    <h1 class="brand">Budget-Wise</h1>
+    <p class="subtitle">Join thousands of smart spenders today.</p>
 
-    <div id="registerAlert" class="alert"></div>
+    <div id="alert" class="alert"></div>
 
-    <div class="form-group">
-      <label for="name">Full Name</label>
-      <input type="text" id="name" placeholder="Enter your name" />
-      <div class="field-error" id="nameErr"></div>
-    </div>
+    <form id="registerForm">
+      <div class="form-group" style="text-align: left;">
+        <label for="name">Full Name</label>
+        <input type="text" id="name" placeholder="Enter your name" required>
+      </div>
+      <div class="form-group" style="text-align: left;">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" placeholder="example@email.com" required>
+      </div>
+      <div class="form-group" style="text-align: left;">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="At least 8 characters" required>
+      </div>
+      <div class="form-group" style="text-align: left;">
+        <label for="confirmPassword">Confirm Password</label>
+        <input type="password" id="confirmPassword" placeholder="Re-enter your password" required>
+      </div>
 
-    <div class="form-group">
-      <label for="email">Email</label>
-      <input type="email" id="email" placeholder="example@email.com" />
-      <div class="field-error" id="emailErr"></div>
-    </div>
+      <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+        Create Account
+      </button>
+    </form>
 
-    <div class="form-group">
-      <label for="password">Password</label>
-      <input type="password" id="password" placeholder="At least 8 characters"
-             oninput="updateStrengthBar(this.value)" />
-      <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
-      <div class="strength-text" id="strengthText"></div>
-      <div class="field-error" id="passwordErr"></div>
-    </div>
-
-    <div class="form-group">
-      <label for="confirmPassword">Confirm Password</label>
-      <input type="password" id="confirmPassword" placeholder="Re-enter your password" />
-      <div class="field-error" id="confirmErr"></div>
-    </div>
-
-    <button class="btn" id="registerBtn" data-label="Create Account" onclick="register()">Create Account</button>
-
-    <p class="switch-link">Already have an account? <a href="login.html">Login</a></p>
+    <p class="footer-link">
+      Already have an account? <a href="login.html">Sign in here</a>
+    </p>
   </div>
 
-  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script>
+    document.getElementById('registerForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const btn = e.target.querySelector('button');
+      const alertEl = document.getElementById('alert');
+
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      if (password !== confirmPassword) {
+        alertEl.textContent = 'Passwords do not match';
+        alertEl.className = 'alert alert-error';
+        alertEl.style.display = 'block';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Creating account...';
+      alertEl.style.display = 'none';
+
+      try {
+        await api.auth.register({ name, email, password, confirmPassword });
+
+        alertEl.textContent = 'Account created successfully! Redirecting to login...';
+        alertEl.className = 'alert alert-success';
+        alertEl.style.display = 'block';
+
+        setTimeout(() => window.location.href = 'login.html', 1500);
+      } catch (err) {
+        alertEl.textContent = err.message || 'Something went wrong';
+        alertEl.className = 'alert alert-error';
+        alertEl.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Create Account';
+      }
+    };
+  </script>
 </body>
 </html>

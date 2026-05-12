@@ -42,7 +42,7 @@ const transactionController = {
 
       const userId = (req as any).user.id;
 
-      const { savedTransaction, newBalance, nearLimit, categoryName } =
+      const { savedTransaction, newBalance, warning } =
         await transactionService.addTransaction(
           userId,
           amount,
@@ -57,6 +57,7 @@ const transactionController = {
 
       res.status(201).json({
         message: "Transaction added successfully.",
+        warning,
         data: {
           transactionId: savedTransaction._id,
           type: savedTransaction.type,
@@ -65,7 +66,6 @@ const transactionController = {
           description: savedTransaction.description,
           newBalance,
         },
-        warning: nearLimit ? `Warning: You have reached 90% of your limit for the ${categoryName} category!` : null,
       });
     } catch (error) {
       res.status(400).json({
@@ -137,7 +137,7 @@ const transactionController = {
       const transactionId = getParamString(req.params.id);
       const updates = req.body as TransactionUpdates;
 
-      const { updatedTransaction, newBalance } =
+      const { updatedTransaction, newBalance, warning } =
         await transactionService.editTransaction(
           transactionId,
           userId,
@@ -146,6 +146,7 @@ const transactionController = {
 
       res.status(200).json({
         message: "Transaction updated successfully.",
+        warning,
         data: {
           transaction: updatedTransaction,
           newBalance,
@@ -225,6 +226,16 @@ const transactionController = {
     } catch (error) {
       const message = getErrorMessage(error);
       res.status(getErrorStatus(message)).json({ message });
+    }
+  },
+
+  clearAll: async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = (req as any).user.id;
+      await transactionService.clearAllTransactionsAndCategories(userId);
+      res.status(200).json({ message: "All transactions and custom categories cleared successfully." });
+    } catch (error) {
+      res.status(500).json({ message: getErrorMessage(error) });
     }
   },
 };

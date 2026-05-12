@@ -3,19 +3,20 @@ import Category, { CategoryDocument, CategoryType } from '../models/Category';
 import Expense from '../models/Expense';
 import Income from '../models/Income';
 import Transaction, { TransactionDocument, TransactionFilters } from '../models/Transaction';
+import FinancialGoalModel from '../models/financialGoalModel';
 
 type TransactionTypeInput = 'Income' | 'Expense' | 'income' | 'expense' | string;
 
 interface AddTransactionResult {
     savedTransaction: TransactionDocument;
     newBalance: number;
-    nearLimit?: boolean;
-    categoryName?: string;
+    warning?: string;
 }
 
 interface EditTransactionResult {
     updatedTransaction: TransactionDocument | null;
     newBalance: number;
+    warning?: string;
 }
 
 interface DeleteTransactionResult {
@@ -37,6 +38,7 @@ export interface TransactionUpdates {
 interface TransactionSummary {
     totalIncome: number;
     totalExpenses: number;
+    totalGoalSavings: number;
     balance: number;
     transactionCount: number;
 }
@@ -57,7 +59,10 @@ const findAvailableCategory = async (
     const category = await Category.findOne({
         _id: categoryId,
         type,
-        userId
+        $or: [
+            { isDefault: true },
+            { userId }
+        ]
     });
 
     if (!category) {
@@ -93,14 +98,9 @@ const TransactionService = {
 
         const transactionType = normalizeText(type).toLowerCase();
         let newTransaction: TransactionDocument;
-        let nearLimit = false;
-        let categoryName = '';
 
         if (transactionType === 'income') {
-            const cleanSource = normalizeText(source);
-            if (!cleanSource) {
-                throw new Error('Income source is required.');
-            }
+            const cleanSource = normalizeText(source) || 'General Income';
 
             if (categoryId) {
                 await findAvailableCategory(categoryId, userId, 'income');
@@ -120,45 +120,7 @@ const TransactionService = {
                 throw new Error('Category is required for an expense.');
             }
 
-            const category = await findAvailableCategory(categoryId, userId, 'expense');
-            categoryName = category.name;
-
-            // Check category limit
-            if (category.limit > 0) {
-                const startOfMonth = new Date();
-                startOfMonth.setDate(1);
-                startOfMonth.setHours(0, 0, 0, 0);
-
-                const currentSpendingResult = await Transaction.aggregate([
-                    {
-                        $match: {
-                            userId: new mongoose.Types.ObjectId(userId),
-                            category: new mongoose.Types.ObjectId(categoryId),
-                            type: 'Expense',
-                            date: { $gte: startOfMonth }
-                        }
-                    },
-                    {
-                        $group: {
-                            _id: null,
-                            total: { $sum: '$amount' }
-                        }
-                    }
-                ]);
-
-                const currentSpending = currentSpendingResult.length > 0 ? currentSpendingResult[0].total : 0;
-                const totalAfterTransaction = currentSpending + numericAmount;
-
-                if (totalAfterTransaction > category.limit) {
-                    throw new Error(`Transaction failed: This would exceed the ${category.name} category limit of ${category.limit}. Current spending: ${currentSpending}.`);
-                }
-
-                // Check if near limit (90%)
-                if (totalAfterTransaction >= category.limit * 0.9) {
-                    nearLimit = true;
-                }
-            }
-
+            await findAvailableCategory(categoryId, userId, 'expense');
             newTransaction = new Expense({
                 userId,
                 amount: numericAmount,
@@ -176,11 +138,15 @@ const TransactionService = {
         const savedTransaction = await newTransaction.addTransaction();
         const newBalance = await TransactionService.calculateBalance(userId);
 
+        let warning: string | undefined;
+        if (transactionType === 'expense' && categoryId) {
+            warning = await TransactionService._checkCategoryLimit(userId, categoryId, numericAmount);
+        }
+
         return {
             savedTransaction,
             newBalance,
-            nearLimit,
-            categoryName
+            warning
         };
     },
 
@@ -271,7 +237,12 @@ const TransactionService = {
 
         const newBalance = await TransactionService.calculateBalance(userId);
 
-        return { updatedTransaction, newBalance };
+        let warning: string | undefined;
+        if (updatedTransaction && updatedTransaction.type === 'Expense' && updatedTransaction.category) {
+            warning = await TransactionService._checkCategoryLimit(userId, updatedTransaction.category.toString(), 0);
+        }
+
+        return { updatedTransaction, newBalance, warning };
     },
 
     deleteTransaction: async (transactionId: string, userId: string): Promise<DeleteTransactionResult> => {
@@ -311,7 +282,8 @@ const TransactionService = {
             }
         }
 
-        const balance = totalIncome - totalExpenses;
+        const totalGoalSavings = await TransactionService.calculateGoalSavings(userId);
+        const balance = totalIncome - totalExpenses - totalGoalSavings;
         const groupedByDate = TransactionService._groupTransactionsByDate(transactions);
 
         return {
@@ -320,6 +292,7 @@ const TransactionService = {
             summary: {
                 totalIncome: Number(totalIncome.toFixed(2)),
                 totalExpenses: Number(totalExpenses.toFixed(2)),
+                totalGoalSavings: Number(totalGoalSavings.toFixed(2)),
                 balance: Number(balance.toFixed(2)),
                 transactionCount: transactions.length
             }
@@ -361,12 +334,29 @@ const TransactionService = {
             }
         }
 
-        return Number((totalIncome - totalExpenses).toFixed(2));
+        const totalGoalSavings = await TransactionService.calculateGoalSavings(userId);
+
+        return Number((totalIncome - totalExpenses - totalGoalSavings).toFixed(2));
     },
 
-    createCategory: async (userId: string, name: string, type: string, limit = 0): Promise<CategoryDocument> => {
+    calculateGoalSavings: async (userId: string): Promise<number> => {
+        const result: Array<{ totalGoalSavings: number }> = await FinancialGoalModel.aggregate([
+            { $match: { userId: new mongoose.Types.ObjectId(userId) } },
+            {
+                $group: {
+                    _id: null,
+                    totalGoalSavings: { $sum: { $ifNull: ['$currentAmount', 0] } }
+                }
+            }
+        ]);
+
+        return result[0]?.totalGoalSavings || 0;
+    },
+
+    createCategory: async (userId: string, name: string, type: string, limit: number | string = 0): Promise<CategoryDocument> => {
         const cleanName = normalizeText(name);
         const cleanType = normalizeText(type).toLowerCase() as CategoryType;
+        const numericLimit = Number(limit) || 0;
 
         if (!cleanName) {
             throw new Error('Category name is required.');
@@ -379,7 +369,10 @@ const TransactionService = {
         const existingCategory = await Category.findOne({
             name: cleanName,
             type: cleanType,
-            userId
+            $or: [
+                { isDefault: true },
+                { userId }
+            ]
         });
 
         if (existingCategory) {
@@ -390,7 +383,8 @@ const TransactionService = {
             userId,
             name: cleanName,
             type: cleanType,
-            limit: Number(limit) || 0
+            isDefault: false,
+            limit: numericLimit
         });
 
         return await category.createCategory();
@@ -401,6 +395,9 @@ const TransactionService = {
 
         if (!category) {
             throw new Error('Category not found.');
+        }
+        if (category.isDefault) {
+            throw new Error('Cannot delete a default system category.');
         }
         if (!category.userId || category.userId.toString() !== userId.toString()) {
             throw new Error('You are not authorized to delete this category.');
@@ -416,7 +413,20 @@ const TransactionService = {
     },
 
     getAllCategories: async (userId: string): Promise<CategoryDocument[]> => {
-        return await Category.find({ userId }).sort({ name: 1 });
+        return await Category.find({
+            $or: [
+                { isDefault: true },
+                { userId }
+            ]
+        }).sort({ name: 1 });
+    },
+
+    clearAllTransactionsAndCategories: async (userId: string): Promise<void> => {
+        const userObjId = new mongoose.Types.ObjectId(userId);
+        await Promise.all([
+            Transaction.deleteMany({ userId: userObjId }),
+            Category.deleteMany({ userId: userObjId, isDefault: false })
+        ]);
     },
 
     _groupTransactionsByDate: (transactions: TransactionDocument[]): Record<string, TransactionDocument[]> => {
@@ -448,6 +458,43 @@ const TransactionService = {
         }
 
         return groups;
+    },
+
+    _checkCategoryLimit: async (userId: string, categoryId: string, additionalAmount: number): Promise<string | undefined> => {
+        const category = await Category.findById(categoryId);
+        if (!category || !category.limit || category.limit <= 0) return undefined;
+
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        startOfMonth.setHours(0, 0, 0, 0);
+
+        const totalSpentResult = await Transaction.aggregate([
+            {
+                $match: {
+                    userId: new mongoose.Types.ObjectId(userId),
+                    category: new mongoose.Types.ObjectId(categoryId),
+                    type: 'Expense',
+                    date: { $gte: startOfMonth }
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    total: { $sum: '$amount' }
+                }
+            }
+        ]);
+
+        const currentTotal = totalSpentResult[0]?.total || 0;
+        const totalWithNew = currentTotal; // The transaction is already saved if called from addTransaction
+
+        if (currentTotal >= category.limit) {
+            return `Warning: You have exceeded your $${category.limit} limit for ${category.name} this month! (Spent: $${currentTotal.toFixed(2)})`;
+        } else if (currentTotal >= category.limit * 0.9) {
+            return `Alert: You are approaching your $${category.limit} limit for ${category.name}. (Spent: $${currentTotal.toFixed(2)})`;
+        }
+
+        return undefined;
     }
 };
 

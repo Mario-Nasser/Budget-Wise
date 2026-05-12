@@ -9,7 +9,7 @@ const FinancialGoalSchema = new mongoose.Schema({
   },
   goalName: String,
   targetAmount: Number,
-  currentAmount: Number,
+  currentAmount: { type: Number, default: 0 },
   deadline: Date
 });
 

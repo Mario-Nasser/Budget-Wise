@@ -11,7 +11,10 @@ export class FinancialGoal {
   private goalData: GoalData;
 
   constructor(data: GoalData) {
-    this.goalData = data;
+    this.goalData = {
+      ...data,
+      currentAmount: data.currentAmount || 0
+    };
   }
 
   get goalId() {

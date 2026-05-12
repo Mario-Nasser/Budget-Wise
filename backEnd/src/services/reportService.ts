@@ -1,49 +1,64 @@
+import mongoose from "mongoose";
 import { SpendingPattern, Report, ExpenseByCategory } from "../models/Reports.dto";
 import Transaction, { TransactionFilters } from "../models/Transaction";
+import FinancialGoalModel from "../models/financialGoalModel";
 
 class ReportService {
   static async getReport(
+    userId: string,
     filters: TransactionFilters,
     groupBy: "day" | "week" | "month" = "week",
-  ): Promise<Report> {
-    const [totalIncome, totalExpenses, expenseByCategory, spendingPattern] =
+  ): Promise<any> {
+    const [totalIncome, totalExpenses, totalGoalSavings, expenseByCategory, incomeByCategory, spendingPattern, transactions] =
       await Promise.all([
-        this.totalIncome(filters),
-        this.totalExpenses(filters),
-        this.expenseByCategory(filters),
-        this.spendingPattern(filters, groupBy),
+        this.totalIncome(userId, filters),
+        this.totalExpenses(userId, filters),
+        this.totalGoalSavings(userId),
+        this.expenseByCategory(userId, filters),
+        this.incomeByCategory(userId, filters),
+        this.spendingPattern(userId, filters, groupBy),
+        Transaction.fetchTransactions(userId, filters)
       ]);
-    const result: Report = {
-      totalIncome: totalIncome,
-      totalExpenses: totalExpenses,
-      expenseByCategory: expenseByCategory.map((c) => {
-        const total = totalExpenses || 1; // avoid division by zero
-        return {
-          categoryName: c.categoryName,
-          totalAmount: c.totalAmount,
-          percentage: (c.totalAmount / total) * 100,
-        };
-      }),
-      categoryChart: {
-        labels: expenseByCategory.map((c) => c.categoryName),
-        values: expenseByCategory.map((c) => c.totalAmount),
-      },
-      spendingPattern: spendingPattern,
-    };
 
-    return result;
+    return {
+      summary: {
+        totalIncome,
+        totalExpenses,
+        totalGoalSavings,
+        netBalance: totalIncome - totalExpenses - totalGoalSavings,
+      },
+      spendingByCategory: expenseByCategory.map((c) => ({
+        category: c.categoryName,
+        total: c.totalAmount,
+      })),
+      incomeByCategory: incomeByCategory.map((c) => ({
+        category: c.categoryName,
+        total: c.totalAmount,
+      })),
+      spendingPattern,
+      transactions: transactions.map(t => ({
+        id: t._id,
+        amount: t.amount,
+        type: t.type,
+        date: t.date,
+        description: t.description,
+        category: (t as any).category
+      }))
+    };
   }
-  // spending patterns
+
   static async spendingPattern(
+    userId: string,
     filters: TransactionFilters = {},
     groupBy: "day" | "week" | "month" = "week",
   ): Promise<SpendingPattern[]> {
+    const isValidDate = (d: any) => d && d !== 'undefined' && d !== 'null';
     const dateFilter =
-      filters.startDate || filters.endDate
+      isValidDate(filters.startDate) || isValidDate(filters.endDate)
         ? {
             date: {
-              ...(filters.startDate && { $gte: new Date(filters.startDate) }),
-              ...(filters.endDate && { $lte: new Date(filters.endDate) }),
+              ...(isValidDate(filters.startDate) && { $gte: new Date(filters.startDate as string) }),
+              ...(isValidDate(filters.endDate) && { $lte: new Date(filters.endDate as string) }),
             },
           }
         : {};
@@ -56,16 +71,12 @@ class ReportService {
         month: { $month: "$date" },
         day: { $dayOfMonth: "$date" },
       };
-    }
-
-    if (groupBy === "week") {
+    } else if (groupBy === "week") {
       groupStage = {
         year: { $year: "$date" },
         week: { $isoWeek: "$date" },
       };
-    }
-
-    if (groupBy === "month") {
+    } else if (groupBy === "month") {
       groupStage = {
         year: { $year: "$date" },
         month: { $month: "$date" },
@@ -75,23 +86,21 @@ class ReportService {
     const pattern: SpendingPattern[] = await Transaction.aggregate([
       {
         $match: {
+          userId: new mongoose.Types.ObjectId(userId),
           type: "Expense",
           ...dateFilter,
         },
       },
       {
-        // group by the specified pattern and sum amounts
         $group: {
           _id: groupStage,
           totalSpent: { $sum: "$amount" },
         },
       },
       {
-        // sort by date ascending
         $sort: { _id: 1 },
       },
       {
-        // project the output to have a readable period format
         $project: {
           _id: 0,
           period: "$_id",
@@ -102,21 +111,19 @@ class ReportService {
 
     return pattern;
   }
-  // Calculate total income for a user with optional date filters
-  static async totalIncome(filters: TransactionFilters): Promise<number> {
+
+  static async totalIncome(userId: string, filters: TransactionFilters): Promise<number> {
+    const isValidDate = (d: any) => d && d !== 'undefined' && d !== 'null';
     const result = await Transaction.aggregate([
       {
         $match: {
+          userId: new mongoose.Types.ObjectId(userId),
           type: "Income",
-          ...(filters.startDate || filters.endDate
+          ...(isValidDate(filters.startDate) || isValidDate(filters.endDate)
             ? {
                 date: {
-                  ...(filters.startDate
-                    ? { $gte: new Date(filters.startDate) }
-                    : {}),
-                  ...(filters.endDate
-                    ? { $lte: new Date(filters.endDate) }
-                    : {}),
+                  ...(isValidDate(filters.startDate) ? { $gte: new Date(filters.startDate as string) } : {}),
+                  ...(isValidDate(filters.endDate) ? { $lte: new Date(filters.endDate as string) } : {}),
                 },
               }
             : {}),
@@ -129,25 +136,21 @@ class ReportService {
         },
       },
     ]);
-    // return total income or 0 if no income transactions found
     return result[0]?.totalIncome || 0;
   }
 
-  // Calculate total expenses for a user with optional date filters
-  static async totalExpenses(filters: TransactionFilters): Promise<number> {
+  static async totalExpenses(userId: string, filters: TransactionFilters): Promise<number> {
+    const isValidDate = (d: any) => d && d !== 'undefined' && d !== 'null';
     const result = await Transaction.aggregate([
       {
         $match: {
+          userId: new mongoose.Types.ObjectId(userId),
           type: "Expense",
-          ...(filters.startDate || filters.endDate
+          ...(isValidDate(filters.startDate) || isValidDate(filters.endDate)
             ? {
                 date: {
-                  ...(filters.startDate
-                    ? { $gte: new Date(filters.startDate) }
-                    : {}),
-                  ...(filters.endDate
-                    ? { $lte: new Date(filters.endDate) }
-                    : {}),
+                  ...(isValidDate(filters.startDate) ? { $gte: new Date(filters.startDate as string) } : {}),
+                  ...(isValidDate(filters.endDate) ? { $lte: new Date(filters.endDate as string) } : {}),
                 },
               }
             : {}),
@@ -160,45 +163,57 @@ class ReportService {
         },
       },
     ]);
-
     return result[0]?.totalExpenses || 0;
   }
 
-  // Get expense breakdown by category for a user with optional date filters
+  static async totalGoalSavings(userId: string): Promise<number> {
+    const result = await FinancialGoalModel.aggregate([
+      {
+        $match: {
+          userId: new mongoose.Types.ObjectId(userId),
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalGoalSavings: { $sum: { $ifNull: ["$currentAmount", 0] } },
+        },
+      },
+    ]);
+
+    return result[0]?.totalGoalSavings || 0;
+  }
+
   static async expenseByCategory(
+    userId: string,
     filters: TransactionFilters = {},
   ): Promise<ExpenseByCategory[]> {
+    const isValidDate = (d: any) => d && d !== 'undefined' && d !== 'null';
     const dateFilter =
-      filters.startDate || filters.endDate
+      isValidDate(filters.startDate) || isValidDate(filters.endDate)
         ? {
             date: {
-              ...(filters.startDate && {
-                $gte: new Date(filters.startDate),
-              }),
-              ...(filters.endDate && {
-                $lte: new Date(filters.endDate),
-              }),
+              ...(isValidDate(filters.startDate) && { $gte: new Date(filters.startDate as string) }),
+              ...(isValidDate(filters.endDate) && { $lte: new Date(filters.endDate as string) }),
             },
           }
         : {};
 
     const result: ExpenseByCategory[] = await Transaction.aggregate([
       {
-        // condition to match only expenses for the user and apply date filters if provided
         $match: {
+          userId: new mongoose.Types.ObjectId(userId),
           type: "Expense",
           ...dateFilter,
         },
       },
       {
-        // group by category and sum amounts
         $group: {
           _id: "$category",
           totalAmount: { $sum: "$amount" },
         },
       },
       {
-        // join with categories collection to get category names
         $lookup: {
           from: "categories",
           localField: "_id",
@@ -207,14 +222,64 @@ class ReportService {
         },
       },
       {
-        // flatten the category array to get category details
         $unwind: "$category",
       },
       {
-        // project the final output with category name and total amount
         $project: {
           _id: 0,
           categoryName: "$category.name",
+          totalAmount: 1,
+        },
+      },
+    ]);
+
+    return result;
+  }
+
+  static async incomeByCategory(
+    userId: string,
+    filters: TransactionFilters = {},
+  ): Promise<ExpenseByCategory[]> {
+    const isValidDate = (d: any) => d && d !== 'undefined' && d !== 'null';
+    const dateFilter =
+      isValidDate(filters.startDate) || isValidDate(filters.endDate)
+        ? {
+            date: {
+              ...(isValidDate(filters.startDate) && { $gte: new Date(filters.startDate as string) }),
+              ...(isValidDate(filters.endDate) && { $lte: new Date(filters.endDate as string) }),
+            },
+          }
+        : {};
+
+    const result: ExpenseByCategory[] = await Transaction.aggregate([
+      {
+        $match: {
+          userId: new mongoose.Types.ObjectId(userId),
+          type: "Income",
+          ...dateFilter,
+        },
+      },
+      {
+        $group: {
+          _id: "$category",
+          totalAmount: { $sum: "$amount" },
+        },
+      },
+      {
+        $lookup: {
+          from: "categories",
+          localField: "_id",
+          foreignField: "_id",
+          as: "category",
+        },
+      },
+      {
+        $unwind: { path: "$category", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $project: {
+          _id: 0,
+          categoryName: { $ifNull: ["$category.name", "General Income"] },
           totalAmount: 1,
         },
       },

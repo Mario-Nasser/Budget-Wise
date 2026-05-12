@@ -1,93 +1,226 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Financial Report</title>
-    <link rel="stylesheet" href="./assets/css/report.css">
-    <link rel="stylesheet" href="./assets/css/nav.css">
-    
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Budget-Wise | Reports</title>
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .nav-brand {
+      font-size: 1.5rem;
+      font-weight: 800;
+      background: linear-gradient(to right, #059669, #10b981);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .chart-container {
+      position: relative;
+      height: 300px;
+      margin-top: 1.5rem;
+    }
+  </style>
 </head>
-
 <body>
-    <nav>
-        <a href="index.html">Financial Goals</a>
-        <a href="report.html">Report</a>
-        <a href="addTransaction.html">Add Transaction</a>
-        <a href="login.html" id="logoutLink" onclick="logout()">Logout</a>
-    </nav>
-    <div class="report-container">
-        <h1>Financial Report</h1>
+  <nav>
+    <div class="nav-brand">Budget-Wise</div>
+    <ul class="nav-links">
+      <li><a href="index.html">Financial Goals</a></li>
+      <li><a href="addTransaction.html">Transactions</a></li>
+      <li><a href="report.html" class="active">Reports</a></li>
+    </ul>
+    <div style="display: flex; gap: 1rem; align-items: center;">
+      <span id="nav-user-name" style="color: var(--text-muted); font-size: 0.875rem;"></span>
+      <button onclick="handleLogout()" class="btn btn-primary" style="padding: 0.5rem 1rem;">Logout</button>
+    </div>
+  </nav>
 
-        <form method="get" id="filter-form">
-            <div>
-                <label for="startDate">Start Date:</label>
-                <input type="date" id="startDate" name="startDate">
-            </div>
+  <div class="container">
+    <div class="grid grid-2">
+      <!-- Summary Cards -->
+      <div class="glass-card animate-fade-in" style="padding: 2rem;">
+        <h2>Financial Summary</h2>
+        <div id="summaryContent" style="margin-top: 1.5rem;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+            <span>Total Income:</span>
+            <span id="totalIncome" style="color: var(--success); font-weight: 700;">$0.00</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+            <span>Total Expenses:</span>
+            <span id="totalExpenses" style="color: var(--error); font-weight: 700;">$0.00</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+            <span>Goal Savings:</span>
+            <span id="totalGoalSavings" style="color: var(--warning); font-weight: 700;">$0.00</span>
+          </div>
+          <div style="height: 1px; background: var(--border); margin: 1rem 0;"></div>
+          <div style="display: flex; justify-content: space-between; font-size: 1.25rem;">
+            <span>Net Balance:</span>
+            <span id="netBalance" style="font-weight: 800;">$0.00</span>
+          </div>
+        </div>
+      </div>
 
-            <div>
-                <label for="endDate">End Date:</label>
-                <input type="date" id="endDate" name="endDate">
-            </div>
-            <div>
-                <label for="pattern">Pattern:</label>
-                <select id="pattern" name="pattern">
-                    <option value="">Select Pattern</option>
-                    <option value="day">Day</option>
-                    <option value="week">Week</option>
-                    <option value="month">Month</option>
-                </select>
-                <p id="patternError" class="error-message"></p>
-            </div>
+      <!-- Expense Chart Section -->
+      <div class="glass-card animate-fade-in" style="padding: 2rem; animation-delay: 0.1s;">
+        <h2>Spending by Category</h2>
+        <div class="chart-container">
+          <canvas id="spendingChart"></canvas>
+        </div>
+      </div>
 
-            <button onclick="generateReport(event);" type="submit">Generate Report</button>
-        </form>
+      <!-- Income Chart Section -->
+      <div class="glass-card animate-fade-in" style="padding: 2rem; animation-delay: 0.2s;">
+        <h2>Income Breakdown</h2>
+        <div class="chart-container">
+          <canvas id="incomeChart"></canvas>
+        </div>
+      </div>
 
-        <!-- info section -->
-        <section id="info">
-            <div class="period-info">
-                Report - from <span id="ReportStartDate"></span> to <span id="ReportEndDate"></span>
-            </div>
-
-            <div class="info-grid">
-                <div class="info-card">
-                    <label>Total Income</label>
-                    <p id="totalIncome">$0.00</p>
-                </div>
-
-                <div class="info-card">
-                    <label>Total Expenses</label>
-                    <p id="totalExpenses">$0.00</p>
-                </div>
-
-                <div class="info-card">
-                    <label>Net Savings</label>
-                    <p id="netSavings">$0.00</p>
-                </div>
-            </div>
-
-            <div style="background: #fafafa; padding: 15px; border-radius: 4px;">
-                <h3>Category Breakdown</h3>
-                <div id="categoryBreakdown"></div>
-            </div>
-            <div>
-                <h3>spending patterns</h3>
-                <canvas id="spendingPatternChart"></canvas>
-            </div>
-            <!-- charts for expenses breakdown -->
-            <section id="charts">
-            <canvas id="myChart"></canvas>
-            <canvas id="incomeExpenseBarChart"></canvas>
-        </section>
-        </section>
-
-        
+      <!-- Trend Chart Section -->
+      <div class="glass-card animate-fade-in" style="padding: 2rem; animation-delay: 0.3s;">
+        <h2>Monthly Trend</h2>
+        <div class="chart-container">
+          <canvas id="trendChart"></canvas>
+        </div>
+      </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="./assets/js/report.js"></script>
+    <!-- Details Table -->
+    <div class="glass-card animate-fade-in" style="padding: 2rem; margin-top: 2rem; animation-delay: 0.4s;">
+      <h2>Detailed Report</h2>
+      <div style="overflow-x: auto; margin-top: 1.5rem;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--border); color: var(--text-muted); font-size: 0.875rem;">
+              <th style="padding: 1rem;">Date</th>
+              <th style="padding: 1rem;">Category</th>
+              <th style="padding: 1rem;">Description</th>
+              <th style="padding: 1rem; text-align: right;">Amount</th>
+            </tr>
+          </thead>
+          <tbody id="reportTableBody">
+            <!-- Rows will be added here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
+  <script src="assets/js/api.js"></script>
+  <script>
+    if (!localStorage.getItem('token')) window.location.href = 'login.html';
+
+    let spendingChart = null;
+    let incomeChart = null;
+    let trendChart = null;
+
+    async function loadReport() {
+      try {
+        const res = await api.reports.get({ pattern: 'month' });
+        const data = res.data;
+        let totalGoalSavings = data.summary.totalGoalSavings;
+        if (typeof totalGoalSavings !== 'number') {
+          const goals = await api.goals.getAll();
+          totalGoalSavings = goals.reduce((total, goal) => total + Number(goal.currentAmount || 0), 0);
+        }
+
+        // Update Summary
+        document.getElementById('totalIncome').textContent = `$${data.summary.totalIncome.toFixed(2)}`;
+        document.getElementById('totalExpenses').textContent = `$${data.summary.totalExpenses.toFixed(2)}`;
+        document.getElementById('totalGoalSavings').textContent = `$${totalGoalSavings.toFixed(2)}`;
+        const balance = data.summary.totalIncome - data.summary.totalExpenses - totalGoalSavings;
+        const balanceEl = document.getElementById('netBalance');
+        balanceEl.textContent = `$${balance.toFixed(2)}`;
+        balanceEl.style.color = balance >= 0 ? 'var(--success)' : 'var(--error)';
+
+        // Update Table
+        const tableBody = document.getElementById('reportTableBody');
+        tableBody.innerHTML = '';
+        data.transactions.forEach(t => {
+          const row = document.createElement('tr');
+          row.style.borderBottom = '1px solid var(--border)';
+          row.innerHTML = `
+            <td style="padding: 1rem;">${new Date(t.date).toLocaleDateString()}</td>
+            <td style="padding: 1rem;"><span class="category-badge">${t.category?.name || 'N/A'}</span></td>
+            <td style="padding: 1rem; color: var(--text-muted);">${t.description || '-'}</td>
+            <td style="padding: 1rem; text-align: right; font-weight: 600; color: ${t.type === 'Income' ? 'var(--success)' : 'var(--error)'}">
+              ${t.type === 'Income' ? '+' : '-'}$${t.amount.toFixed(2)}
+            </td>
+          `;
+          tableBody.appendChild(row);
+        });
+
+        // Update Charts
+        initDoughnutChart('spendingChart', spendingChart, data.spendingByCategory, ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']);
+        initDoughnutChart('incomeChart', incomeChart, data.incomeByCategory, ['#10b981', '#34d399', '#6ee7b7', '#059669']);
+
+        // Trend Chart
+        const trendCtx = document.getElementById('trendChart').getContext('2d');
+        if (trendChart) trendChart.destroy();
+        trendChart = new Chart(trendCtx, {
+          type: 'line',
+          data: {
+            labels: data.spendingPattern.map(p => `${p.period.month}/${p.period.year}`),
+            datasets: [{
+              label: 'Expenses',
+              data: data.spendingPattern.map(p => p.totalSpent),
+              borderColor: '#ef4444',
+              tension: 0.4,
+              fill: false
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: '#94a3b8' } } },
+            scales: {
+              y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+              x: { ticks: { color: '#94a3b8' }, grid: { display: false } }
+            }
+          }
+        });
+
+      } catch (err) {
+        console.error('Error loading report:', err);
+      }
+    }
+
+    function initDoughnutChart(id, chartObj, chartData, colors) {
+      const ctx = document.getElementById(id).getContext('2d');
+      if (chartObj) chartObj.destroy();
+
+      const categories = chartData.map(c => c.category);
+      const amounts = chartData.map(c => c.total);
+
+      return new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: categories,
+          datasets: [{
+            data: amounts,
+            backgroundColor: colors,
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { color: '#94a3b8', padding: 10, font: { size: 10 } }
+            }
+          }
+        }
+      });
+    }
+
+    loadReport();
+  </script>
 </body>
-
 </html>

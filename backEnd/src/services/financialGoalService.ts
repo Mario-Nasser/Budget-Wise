@@ -9,51 +9,75 @@ class FinancialGoalService {
       ...data,
     });
 
-    return await FinancialGoalModel.create(goal.getData());
+    const saved = await FinancialGoalModel.create(goal.getData());
+    const obj = saved.toObject() as any;
+    obj.userId = obj.userId.toString();
+    return new FinancialGoal(obj as GoalData).getFullDetails();
   }
 
   static async getGoal(goalId: string, userId: string) {
-    const data: GoalData | null = await FinancialGoalModel.findOne({
+    const data = await FinancialGoalModel.findOne({
       goalId,
       userId,
     });
 
     if (!data) throw new Error("Goal not found");
 
-    const goal = new FinancialGoal(data);
+    const obj = data.toObject() as any;
+    obj.userId = obj.userId.toString();
+    const goal = new FinancialGoal(obj as GoalData);
     return goal.getFullDetails();
   }
 
   static async updateProgress(goalId: string, amount: number, userId: string) {
-    const data: GoalData | null = await FinancialGoalModel.findOne({
+    const numericAmount = Number(amount);
+
+    if (Number.isNaN(numericAmount) || numericAmount <= 0) {
+      throw new Error("Amount must be positive");
+    }
+
+    const data = await FinancialGoalModel.findOne({
       goalId,
       userId,
     });
 
     if (!data) throw new Error("Goal not found");
 
-    const goal = new FinancialGoal(data);
-    goal.updateProgress(amount);
+    const obj = data.toObject() as any;
+    obj.userId = obj.userId.toString();
+    const goal = new FinancialGoal(obj as GoalData);
+    goal.updateProgress(numericAmount);
 
     await FinancialGoalModel.updateOne(
       { goalId, userId },
-      { currentAmount: goal.getData().currentAmount }
+      { currentAmount: goal.getData().currentAmount },
     );
 
     return goal.getFullDetails();
   }
 
   static async getAllGoals(userId: string) {
-    const goals: GoalData[] | null = await FinancialGoalModel.find({
+    await FinancialGoalModel.updateMany(
+      { userId, currentAmount: { $exists: false } },
+      { $set: { currentAmount: 0 } },
+    );
+
+    const goals = await FinancialGoalModel.find({
       userId,
     });
 
-    if (!goals) throw new Error("No goals found");
-
-    return goals.map((g: GoalData) => {
-      const goal = new FinancialGoal(g);
+    return goals.map((g) => {
+      const obj = g.toObject() as any;
+      obj.userId = obj.userId.toString();
+      const goal = new FinancialGoal(obj as GoalData);
       return goal.getFullDetails();
     });
+  }
+
+  static async deleteGoal(goalId: string, userId: string) {
+    const result = await FinancialGoalModel.deleteOne({ goalId, userId });
+    if (result.deletedCount === 0) throw new Error("Goal not found or unauthorized");
+    return { success: true };
   }
 }
 

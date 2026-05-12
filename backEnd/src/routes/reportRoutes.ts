@@ -21,6 +21,12 @@
  *                   type: number
  *                 totalExpenses:
  *                   type: number
+ *                 totalGoalSavings:
+ *                   type: number
+ *                   description: Money saved into financial goals, deducted from available balance but not counted as expenses.
+ *                 netBalance:
+ *                   type: number
+ *                   description: totalIncome minus totalExpenses minus totalGoalSavings.
  *                 expenseByCategory:
  *                   type: object
  *                   additionalProperties:
@@ -35,10 +41,11 @@
 
 import express from 'express';
 import { reportController } from '../controllers/reportController';
+import { verifyToken } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
 // Route to generate a custom report
-router.get('/generate', reportController.generateReport);
+router.get('/', verifyToken, reportController.generateReport);
 
 export default router;
