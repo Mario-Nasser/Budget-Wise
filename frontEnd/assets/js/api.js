@@ -58,6 +58,12 @@ const api = {
     updateProgress: (id, amount) => request(`/goals/${id}/progress`, { method: "PATCH", body: JSON.stringify({ amount }) }),
     delete: (id) => request(`/goals/${id}`, { method: "DELETE" }),
   },
+  budgets: {
+    getAll: () => request("/budgets"),
+    create: (data) => request("/budgets", { method: "POST", body: JSON.stringify(data) }),
+    update: (id, data) => request(`/budgets/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+    delete: (id) => request(`/budgets/${id}`, { method: "DELETE" }),
+  },
   reports: {
     get: (params) => request(`/reports?${new URLSearchParams(params)}`),
   }

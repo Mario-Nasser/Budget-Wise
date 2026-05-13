@@ -4,6 +4,7 @@ import Expense from '../models/Expense';
 import Income from '../models/Income';
 import Transaction, { TransactionDocument, TransactionFilters } from '../models/Transaction';
 import FinancialGoalModel from '../models/financialGoalModel';
+import BudgetService from './budgetService';
 
 type TransactionTypeInput = 'Income' | 'Expense' | 'income' | 'expense' | string;
 
@@ -140,7 +141,9 @@ const TransactionService = {
 
         let warning: string | undefined;
         if (transactionType === 'expense' && categoryId) {
-            warning = await TransactionService._checkCategoryLimit(userId, categoryId, numericAmount);
+            warning =
+                await BudgetService.getAlertForTransaction(userId, categoryId, savedTransaction.date) ||
+                await TransactionService._checkCategoryLimit(userId, categoryId, numericAmount);
         }
 
         return {

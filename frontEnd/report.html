@@ -23,6 +23,18 @@
       height: 300px;
       margin-top: 1.5rem;
     }
+    .report-toolbar {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1rem;
+      align-items: end;
+      margin-bottom: 2rem;
+    }
+    @media (max-width: 768px) {
+      .report-toolbar {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
@@ -31,6 +43,7 @@
     <ul class="nav-links">
       <li><a href="index.html">Financial Goals</a></li>
       <li><a href="addTransaction.html">Transactions</a></li>
+      <li><a href="budgets.html">Budgets</a></li>
       <li><a href="report.html" class="active">Reports</a></li>
     </ul>
     <div style="display: flex; gap: 1rem; align-items: center;">
@@ -40,6 +53,29 @@
   </nav>
 
   <div class="container">
+    <div class="glass-card animate-fade-in" style="padding: 2rem; margin-bottom: 2rem;">
+      <h2>Report Filters</h2>
+      <form id="reportFilters" class="report-toolbar">
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="startDate">Start Date</label>
+          <input type="date" id="startDate" name="startDate">
+        </div>
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="endDate">End Date</label>
+          <input type="date" id="endDate" name="endDate">
+        </div>
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="groupBy">Group By</label>
+          <select id="groupBy" name="groupBy">
+            <option value="day">Day</option>
+            <option value="week">Week</option>
+            <option value="month" selected>Month</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Generate Report</button>
+      </form>
+    </div>
+
     <div class="grid grid-2">
       <!-- Summary Cards -->
       <div class="glass-card animate-fade-in" style="padding: 2rem;">
@@ -83,7 +119,7 @@
 
       <!-- Trend Chart Section -->
       <div class="glass-card animate-fade-in" style="padding: 2rem; animation-delay: 0.3s;">
-        <h2>Monthly Trend</h2>
+        <h2>Trend Report</h2>
         <div class="chart-container">
           <canvas id="trendChart"></canvas>
         </div>
@@ -121,7 +157,15 @@
 
     async function loadReport() {
       try {
-        const res = await api.reports.get({ pattern: 'month' });
+        const params = {
+          pattern: document.getElementById('groupBy').value
+        };
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        if (startDate) params.startDate = startDate;
+        if (endDate) params.endDate = endDate;
+
+        const res = await api.reports.get(params);
         const data = res.data;
         let totalGoalSavings = data.summary.totalGoalSavings;
         if (typeof totalGoalSavings !== 'number') {
@@ -141,6 +185,11 @@
         // Update Table
         const tableBody = document.getElementById('reportTableBody');
         tableBody.innerHTML = '';
+        if (!data.transactions.length) {
+          const row = document.createElement('tr');
+          row.innerHTML = '<td colspan="4" style="padding: 1rem; text-align: center; color: var(--text-muted);">No transactions found for this report.</td>';
+          tableBody.appendChild(row);
+        }
         data.transactions.forEach(t => {
           const row = document.createElement('tr');
           row.style.borderBottom = '1px solid var(--border)';
@@ -156,8 +205,8 @@
         });
 
         // Update Charts
-        initDoughnutChart('spendingChart', spendingChart, data.spendingByCategory, ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']);
-        initDoughnutChart('incomeChart', incomeChart, data.incomeByCategory, ['#10b981', '#34d399', '#6ee7b7', '#059669']);
+        spendingChart = initDoughnutChart('spendingChart', spendingChart, data.spendingByCategory, ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']);
+        incomeChart = initDoughnutChart('incomeChart', incomeChart, data.incomeByCategory, ['#10b981', '#34d399', '#6ee7b7', '#059669']);
 
         // Trend Chart
         const trendCtx = document.getElementById('trendChart').getContext('2d');
@@ -165,7 +214,7 @@
         trendChart = new Chart(trendCtx, {
           type: 'line',
           data: {
-            labels: data.spendingPattern.map(p => `${p.period.month}/${p.period.year}`),
+            labels: data.spendingPattern.map(p => formatPeriodLabel(p.period)),
             datasets: [{
               label: 'Expenses',
               data: data.spendingPattern.map(p => p.totalSpent),
@@ -188,6 +237,13 @@
       } catch (err) {
         console.error('Error loading report:', err);
       }
+    }
+
+    function formatPeriodLabel(period) {
+      if (period.day) return `${period.day}/${period.month}/${period.year}`;
+      if (period.week) return `Week ${period.week}, ${period.year}`;
+      if (period.month) return `${period.month}/${period.year}`;
+      return `${period.year}`;
     }
 
     function initDoughnutChart(id, chartObj, chartData, colors) {
@@ -219,6 +275,11 @@
         }
       });
     }
+
+    document.getElementById('reportFilters').addEventListener('submit', (event) => {
+      event.preventDefault();
+      loadReport();
+    });
 
     loadReport();
   </script>

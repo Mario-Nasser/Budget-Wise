@@ -4,6 +4,10 @@ import ReportService from "../services/reportService";
 export const generateReport = async (req: Request, res: Response) => {
   try {
     const { startDate, endDate, pattern } = req.query;
+    const allowedPatterns = ["day", "week", "month"] as const;
+    const reportPattern = allowedPatterns.includes(pattern as any)
+      ? (pattern as "day" | "week" | "month")
+      : "week";
 
     const report = await ReportService.getReport(
       (req as any).user.id,
@@ -11,7 +15,7 @@ export const generateReport = async (req: Request, res: Response) => {
         startDate: startDate as string,
         endDate: endDate as string,
       },
-      (pattern as "day" | "week" | "month") || "week"
+      reportPattern
     );
 
     res.status(200).json({ data: report });

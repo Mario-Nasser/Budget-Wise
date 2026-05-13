@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Budget-Wise | Budgets</title>
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    .budget-card {
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 1rem 0;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--success);
+      transition: width 0.3s;
+    }
+    .progress-fill.near { background: var(--warning); }
+    .progress-fill.over { background: var(--error); }
+    .budget-alert {
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-brand">Budget-Wise</div>
+    <ul class="nav-links">
+      <li><a href="index.html">Financial Goals</a></li>
+      <li><a href="addTransaction.html">Transactions</a></li>
+      <li><a href="budgets.html" class="active">Budgets</a></li>
+      <li><a href="report.html">Reports</a></li>
+    </ul>
+    <div style="display: flex; gap: 1rem; align-items: center;">
+      <span id="nav-user-name" style="color: var(--text-muted); font-size: 0.875rem;"></span>
+      <button onclick="handleLogout()" class="btn btn-primary" style="padding: 0.5rem 1rem;">Logout</button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="grid grid-2">
+      <div class="glass-card animate-fade-in" style="padding: 2rem; height: fit-content;">
+        <h2 id="formTitle">Create Budget</h2>
+        <div id="alert" class="alert"></div>
+        <form id="budgetForm">
+          <input type="hidden" id="budgetId">
+          <div class="form-group">
+            <label for="category">Category</label>
+            <select id="category" required></select>
+          </div>
+          <div class="form-group">
+            <label for="amount">Budget Amount ($)</label>
+            <input type="number" id="amount" step="0.01" placeholder="300.00" required>
+          </div>
+          <div class="form-group">
+            <label for="startDate">Start Date</label>
+            <input type="date" id="startDate" required>
+          </div>
+          <div class="form-group">
+            <label for="endDate">End Date</label>
+            <input type="date" id="endDate" required>
+          </div>
+          <div class="form-group">
+            <label for="alertThreshold">Alert Threshold (%)</label>
+            <input type="number" id="alertThreshold" min="1" max="100" value="100" required>
+          </div>
+          <div style="display: flex; gap: 0.75rem;">
+            <button type="submit" class="btn btn-primary" style="flex: 1;">Save Budget</button>
+            <button type="button" onclick="resetForm()" class="btn" style="background: #e5e7eb; color: var(--text);">Cancel</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="animate-fade-in" style="animation-delay: 0.1s;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+          <h2>Your Budgets</h2>
+          <button onclick="loadBudgets()" class="btn" style="background: rgba(255,255,255,0.05); color: var(--text);">Refresh</button>
+        </div>
+        <div id="budgetAlerts"></div>
+        <div id="budgetList">
+          <p style="color: var(--text-muted);">Loading budgets...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/api.js"></script>
+  <script>
+    if (!localStorage.getItem('token')) window.location.href = 'login.html';
+
+    let budgets = [];
+
+    function dateValue(date) {
+      return new Date(date).toISOString().slice(0, 10);
+    }
+
+    function setCurrentMonthDefaults() {
+      const now = new Date();
+      document.getElementById('startDate').value = dateValue(new Date(now.getFullYear(), now.getMonth(), 1));
+      document.getElementById('endDate').value = dateValue(new Date(now.getFullYear(), now.getMonth() + 1, 0));
+    }
+
+    async function loadCategories() {
+      const res = await api.transactions.categories.getAll();
+      const categories = (res.data || []).filter(c => c.type === 'expense');
+      const select = document.getElementById('category');
+      select.innerHTML = '<option value="">Select Category</option>';
+      categories.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category._id;
+        option.textContent = category.name;
+        select.appendChild(option);
+      });
+    }
+
+    async function loadBudgets() {
+      const list = document.getElementById('budgetList');
+      const alerts = document.getElementById('budgetAlerts');
+      try {
+        const res = await api.budgets.getAll();
+        budgets = res.data || [];
+        list.innerHTML = '';
+        alerts.innerHTML = '';
+
+        const activeAlerts = budgets.filter(b => b.status !== 'On Track');
+        activeAlerts.forEach(b => {
+          const alert = document.createElement('div');
+          alert.className = 'budget-alert';
+          alert.textContent = `${b.status}: ${b.category?.name || 'Category'} is at ${b.percentSpent.toFixed(1)}% of budget.`;
+          alerts.appendChild(alert);
+        });
+
+        if (!budgets.length) {
+          list.innerHTML = '<p style="color: var(--text-muted);">No budgets yet. Create one to start tracking category spending.</p>';
+          return;
+        }
+
+        budgets.forEach(budget => {
+          const percent = Math.min(budget.percentSpent, 100);
+          const level = budget.percentSpent >= 100 ? 'over' : budget.status === 'Near Limit' ? 'near' : '';
+          const card = document.createElement('div');
+          card.className = 'glass-card budget-card';
+          card.innerHTML = `
+            <div style="display: flex; justify-content: space-between; gap: 1rem;">
+              <div>
+                <h3>${budget.category?.name || 'Category'}</h3>
+                <p style="color: var(--text-muted); font-size: 0.875rem;">
+                  ${new Date(budget.startDate).toLocaleDateString()} - ${new Date(budget.endDate).toLocaleDateString()}
+                </p>
+              </div>
+              <span style="font-size: 0.75rem; height: fit-content; background: ${budget.status === 'Exceeded' ? 'var(--error)' : budget.status === 'Near Limit' ? 'var(--warning)' : 'var(--success)'}; padding: 2px 8px; border-radius: 12px; color: white;">
+                ${budget.status}
+              </span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill ${level}" style="width: ${percent}%"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; color: var(--text-muted); font-size: 0.875rem;">
+              <span>Spent: $${budget.spent.toFixed(2)} / $${budget.amount.toFixed(2)}</span>
+              <span>${budget.percentSpent.toFixed(1)}%</span>
+            </div>
+            <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+              <button onclick="editBudget('${budget.id}')" class="btn btn-primary" style="padding: 0.5rem 1rem;">Edit</button>
+              <button onclick="deleteBudget('${budget.id}')" class="btn" style="background: rgba(239, 68, 68, 0.1); color: #b91c1c; border: 1px solid #fecaca; padding: 0.5rem 1rem;">Delete</button>
+            </div>
+          `;
+          list.appendChild(card);
+        });
+      } catch (err) {
+        list.innerHTML = '<p style="color: var(--error);">Error loading budgets.</p>';
+      }
+    }
+
+    function showAlert(text, type) {
+      const alert = document.getElementById('alert');
+      alert.textContent = text;
+      alert.className = `alert alert-${type}`;
+      alert.style.display = 'block';
+      setTimeout(() => alert.style.display = 'none', 3500);
+    }
+
+    function resetForm() {
+      document.getElementById('budgetForm').reset();
+      document.getElementById('budgetId').value = '';
+      document.getElementById('formTitle').textContent = 'Create Budget';
+      setCurrentMonthDefaults();
+    }
+
+    function editBudget(id) {
+      const budget = budgets.find(b => b.id === id);
+      if (!budget) return;
+      document.getElementById('budgetId').value = budget.id;
+      document.getElementById('formTitle').textContent = 'Edit Budget';
+      document.getElementById('category').value = budget.category?._id || budget.category;
+      document.getElementById('amount').value = budget.amount;
+      document.getElementById('startDate').value = dateValue(budget.startDate);
+      document.getElementById('endDate').value = dateValue(budget.endDate);
+      document.getElementById('alertThreshold').value = budget.alertThreshold;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function deleteBudget(id) {
+      if (!confirm('Delete this budget?')) return;
+      try {
+        await api.budgets.delete(id);
+        await loadBudgets();
+      } catch (err) {
+        alert(err.message || 'Error deleting budget');
+      }
+    }
+
+    document.getElementById('budgetForm').onsubmit = async (event) => {
+      event.preventDefault();
+      const id = document.getElementById('budgetId').value;
+      const data = {
+        categoryId: document.getElementById('category').value,
+        amount: Number(document.getElementById('amount').value),
+        startDate: document.getElementById('startDate').value,
+        endDate: document.getElementById('endDate').value,
+        alertThreshold: Number(document.getElementById('alertThreshold').value)
+      };
+
+      try {
+        if (id) await api.budgets.update(id, data);
+        else await api.budgets.create(data);
+        showAlert(id ? 'Budget updated successfully.' : 'Budget created successfully.', 'success');
+        resetForm();
+        await loadBudgets();
+      } catch (err) {
+        showAlert(err.message || 'Error saving budget', 'error');
+      }
+    };
+
+    setCurrentMonthDefaults();
+    loadCategories();
+    loadBudgets();
+  </script>
+</body>
+</html>

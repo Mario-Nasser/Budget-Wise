@@ -12,6 +12,7 @@ import reportRoutes from './routes/reportRoutes';
 import morgan from 'morgan';
 import authRoutes from './routes/authRoutes';
 import transactionRoutes from './routes/transactionRoutes';
+import budgetRoutes from './routes/budgetRoutes';
 
 export const app: Application = express();
 
@@ -33,6 +34,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use('/goals', goalRoutes);
 app.use('/reports', reportRoutes);
 app.use('/transactions', transactionRoutes);
+app.use('/budgets', budgetRoutes);
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../../frontEnd/login.html'));
 });

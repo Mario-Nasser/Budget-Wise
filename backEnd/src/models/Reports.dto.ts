@@ -3,6 +3,7 @@ export interface SpendingPattern {
     year: number;
     month?: number;
     day?: number;
+    week?: number;
   };
   totalSpent: number;
 }
