@@ -1,4 +1,4 @@
-const API_BASE = "https://he-mart-arehouse-mario-nasser4692-43apxqpf.leapcell.dev"; // Relative to root since we serve static files from express
+const API_BASE = "https://udget-ise-mario-nasser4692-vxfgo7mo.leapcell.dev"; // Relative to root since we serve static files from express
 
 async function request(endpoint, options = {}) {
   const token = localStorage.getItem("token");
