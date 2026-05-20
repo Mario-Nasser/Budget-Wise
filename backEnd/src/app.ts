@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import path from 'path';
-dotenv.config({ path: path.join(__dirname, '.env') });
+// Look for .env at the project root level
+dotenv.config({ path: path.join(process.cwd(), '.env') });
 import express, { Application } from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -26,22 +27,27 @@ app.use(morgan(':method :url :status :response-time ms'));
 // DB
 connectDB();
 
+// Leapcell Health Checks (handles both common spellings seen in your platform logs)
+app.get(['/kaithhealthcheck', '/kaithheathcheck'], (req, res) => {
+  res.status(200).send('OK');
+});
+
 // swagger
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // routes
-
 app.use('/goals', goalRoutes);
 app.use('/reports', reportRoutes);
 app.use('/transactions', transactionRoutes);
 app.use('/budgets', budgetRoutes);
+
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../frontEnd/login.html'));
+  res.sendFile(path.join(process.cwd(), 'frontEnd', 'login.html'));
 });
 app.use('/auth', authRoutes);
 
-// static files - serve from root frontEnd directory
-app.use(express.static(path.join(__dirname, '../../frontEnd')));
+// static files - serve from root frontEnd directory safely
+app.use(express.static(path.join(process.cwd(), 'frontEnd')));
 
 // server
 app.listen(3000, () => {
