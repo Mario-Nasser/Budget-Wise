@@ -1,0 +1,213 @@
+if (!localStorage.getItem("token")) window.location.href = "login.html";
+
+let spendingChart = null;
+let incomeChart = null;
+let trendChart = null;
+
+async function loadReport() {
+  try {
+    const params = {
+      pattern: document.getElementById("groupBy").value,
+    };
+    let startDate = document.getElementById("startDate").value;
+    let endDate = document.getElementById("endDate").value;
+    if (!endDate) {
+      endDate = new Date().toISOString().split("T")[0];
+      document.getElementById("endDate").value = endDate;
+    }
+    if (!startDate) {
+      let tempDate = new Date(endDate);
+      tempDate.setMonth(tempDate.getMonth() - 1);
+      startDate = tempDate.toISOString().split("T")[0];
+      document.getElementById("startDate").value = startDate;
+    }
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
+
+    const res = await api.reports.get(params);
+    const data = res.data;
+
+    let totalGoalSavings = data.summary.totalGoalSavings;
+    if (typeof totalGoalSavings !== "number") {
+      const goals = await api.goals.getAll();
+      totalGoalSavings = goals.reduce(
+        (total, goal) => total + Number(goal.currentAmount || 0),
+        0,
+      );
+    }
+    createIncomeExpenseChart(data);
+    // Update Summary
+    document.getElementById("totalIncome").textContent =
+      `$${data.summary.totalIncome.toFixed(2)}`;
+    document.getElementById("totalExpenses").textContent =
+      `$${data.summary.totalExpenses.toFixed(2)}`;
+    document.getElementById("totalGoalSavings").textContent =
+      `$${totalGoalSavings.toFixed(2)}`;
+    const balance =
+      data.summary.totalIncome - data.summary.totalExpenses - totalGoalSavings;
+    const balanceEl = document.getElementById("netBalance");
+    balanceEl.textContent = `$${balance.toFixed(2)}`;
+    balanceEl.style.color = balance >= 0 ? "var(--success)" : "var(--error)";
+
+    // Update Table
+    const tableBody = document.getElementById("reportTableBody");
+    tableBody.innerHTML = "";
+    if (!data.transactions.length) {
+      const row = document.createElement("tr");
+      row.innerHTML =
+        '<td colspan="4" style="padding: 1rem; text-align: center; color: var(--text-muted);">No transactions found for this report.</td>';
+      tableBody.appendChild(row);
+    }
+    data.transactions.forEach((t) => {
+      const row = document.createElement("tr");
+      row.style.borderBottom = "1px solid var(--border)";
+      row.innerHTML = `
+            <td style="padding: 1rem;">${new Date(t.date).toLocaleDateString()}</td>
+            <td style="padding: 1rem;"><span class="category-badge">${t.category?.name || "N/A"}</span></td>
+            <td style="padding: 1rem; color: var(--text-muted);">${t.description || "-"}</td>
+            <td style="padding: 1rem; text-align: right; font-weight: 600; color: ${t.type === "Income" ? "var(--success)" : "var(--error)"}">
+              ${t.type === "Income" ? "+" : "-"}$${t.amount.toFixed(2)}
+            </td>
+          `;
+      tableBody.appendChild(row);
+    });
+
+    // Update Charts
+    spendingChart = initDoughnutChart(
+      "spendingChart",
+      spendingChart,
+      data.spendingByCategory,
+      ["#6366f1", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"],
+    );
+    incomeChart = initDoughnutChart(
+      "incomeChart",
+      incomeChart,
+      data.incomeByCategory,
+      ["#10b981", "#34d399", "#6ee7b7", "#059669"],
+    );
+
+    // Trend Chart
+    const trendCtx = document.getElementById("trendChart").getContext("2d");
+    if (trendChart) trendChart.destroy();
+    trendChart = new Chart(trendCtx, {
+      type: "line",
+      data: {
+        labels: data.spendingPattern.map((p) => formatPeriodLabel(p.period)),
+        datasets: [
+          {
+            label: "Expenses",
+            data: data.spendingPattern.map((p) => p.totalSpent),
+            borderColor: "#ef4444",
+            tension: 0.4,
+            fill: false,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { labels: { color: "#94a3b8" } } },
+        scales: {
+          y: {
+            ticks: { color: "#94a3b8" },
+            grid: { color: "rgba(255,255,255,0.05)" },
+          },
+          x: { ticks: { color: "#94a3b8" }, grid: { display: false } },
+        },
+      },
+    });
+  } catch (err) {
+    console.error("Error loading report:", err);
+  }
+}
+
+function formatPeriodLabel(period) {
+  if (period.day) return `${period.day}/${period.month}/${period.year}`;
+  if (period.week) return `Week ${period.week}, ${period.year}`;
+  if (period.month) return `${period.month}/${period.year}`;
+  return `${period.year}`;
+}
+
+function initDoughnutChart(id, chartObj, chartData, colors) {
+  const ctx = document.getElementById(id).getContext("2d");
+  if (chartObj) chartObj.destroy();
+
+  const categories = chartData.map((c) => c.category);
+  const amounts = chartData.map((c) => c.total);
+
+  return new Chart(ctx, {
+    type: "doughnut",
+    data: {
+      labels: categories,
+      datasets: [
+        {
+          data: amounts,
+          backgroundColor: colors,
+          borderWidth: 0,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: "bottom",
+          labels: { color: "#94a3b8", padding: 10, font: { size: 10 } },
+        },
+      },
+    },
+  });
+}
+
+document.getElementById("reportFilters").addEventListener("submit", (event) => {
+  event.preventDefault();
+  loadReport();
+});
+
+function createIncomeExpenseChart(reportData) {
+  // destroy old chart if exists
+  if (window.incomeExpenseChartInstance) {
+    window.incomeExpenseChartInstance.destroy();
+  }
+
+  const ctx = document.getElementById("incomeExpenseBarChart");
+
+  window.incomeExpenseChartInstance = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: ["Income", "Expenses"],
+      datasets: [
+        {
+          label: "Amount",
+          data: [
+            reportData.summary.totalIncome.toFixed(2),
+            reportData.summary.totalExpenses.toFixed(2),
+          ],
+          backgroundColor: [
+            "rgba(54, 162, 235, 0.7)",
+            "rgba(255, 99, 132, 0.7)",
+          ],
+          borderColor: ["rgba(54, 162, 235, 1)", "rgba(255, 99, 132, 1)"],
+          borderWidth: 2,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+        },
+      },
+      plugins: {
+        title: {
+          display: true,
+          text: "Income vs Expenses",
+        },
+      },
+    },
+  });
+}
+
+loadReport();

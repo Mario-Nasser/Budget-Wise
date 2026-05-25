@@ -1,0 +1,25 @@
+.nav-brand {
+  font-size: 1.5rem;
+  font-weight: 800;
+  background: linear-gradient(to right, #059669, #10b981);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.chart-container {
+  position: relative;
+  height: 300px;
+  margin-top: 1.5rem;
+}
+.report-toolbar {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  align-items: end;
+  margin-bottom: 2rem;
+}
+@media (max-width: 768px) {
+  .report-toolbar {
+    grid-template-columns: 1fr;
+  }
+}

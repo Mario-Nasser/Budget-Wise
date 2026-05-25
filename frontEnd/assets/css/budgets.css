@@ -1,0 +1,32 @@
+.budget-card {
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 1rem 0;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--success);
+  transition: width 0.3s;
+}
+.progress-fill.near {
+  background: var(--warning);
+}
+.progress-fill.over {
+  background: var(--error);
+}
+.budget-alert {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  font-weight: 600;
+}
