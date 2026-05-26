@@ -21,10 +21,24 @@
       <li><a href="budgets.html">Budgets</a></li>
       <li><a href="report.html" class="active">Reports</a></li>
     </ul>
-    <div style="display: flex; gap: 1rem; align-items: center;">
+    <div id="nav-user-info" style="display: flex; gap: 1rem; align-items: center;">
       <span id="nav-user-name" style="color: var(--text-muted); font-size: 0.875rem;"></span>
       <button onclick="handleLogout()" class="btn btn-primary" style="padding: 0.5rem 1rem;">Logout</button>
     </div>
+    <div id="nav-toggle">☰</div>
+    <div id="navOnMobile">
+      <div id="nav-close" style="text-align: right; margin-bottom: 1rem;">X</div>
+      <ul id="linksOnMobile">
+        <li><a href="index.html">Financial Goals</a></li>
+        <li><a href="addTransaction.html">Transactions</a></li>
+        <li><a href="budgets.html">Budgets</a></li>
+        <li><a href="report.html" class="active">Reports</a></li>
+      </ul>
+      <div class="mobile-user-info">
+        <span id="nav-user-name" style="color: var(--text-muted); font-size: 0.875rem;"></span>
+        <button onclick="handleLogout()" class="btn btn-primary" style="padding: 0.5rem 1rem;">Logout</button>
+      </div>
+    </div>  
   </nav>
 
   <div class="container">
@@ -129,5 +143,6 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="assets/js/api.js"></script>
   <script src="assets/js/report.js"></script>
+  <script src="assets/js/main.js"></script>
 </body>
 </html>
