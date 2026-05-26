@@ -58,7 +58,7 @@ class ReportService {
         ? {
             date: {
               ...(isValidDate(filters.startDate) && { $gte: new Date(filters.startDate as string) }),
-              ...(isValidDate(filters.endDate) && { $lte: new Date(filters.endDate as string) }),
+              ...(isValidDate(filters.endDate) && { $lte: new Date(new Date(filters.endDate as string).setHours(23, 59, 59, 999)) }),
             },
           }
         : {};
@@ -123,7 +123,7 @@ class ReportService {
             ? {
                 date: {
                   ...(isValidDate(filters.startDate) ? { $gte: new Date(filters.startDate as string) } : {}),
-                  ...(isValidDate(filters.endDate) ? { $lte: new Date(filters.endDate as string) } : {}),
+                  ...(isValidDate(filters.endDate) ? { $lte: new Date(new Date(filters.endDate as string).setHours(23, 59, 59, 999)) } : {}),
                 },
               }
             : {}),
@@ -150,7 +150,7 @@ class ReportService {
             ? {
                 date: {
                   ...(isValidDate(filters.startDate) ? { $gte: new Date(filters.startDate as string) } : {}),
-                  ...(isValidDate(filters.endDate) ? { $lte: new Date(filters.endDate as string) } : {}),
+                  ...(isValidDate(filters.endDate) ? { $lte: new Date(new Date(filters.endDate as string).setHours(23, 59, 59, 999)) } : {}),
                 },
               }
             : {}),
@@ -194,7 +194,7 @@ class ReportService {
         ? {
             date: {
               ...(isValidDate(filters.startDate) && { $gte: new Date(filters.startDate as string) }),
-              ...(isValidDate(filters.endDate) && { $lte: new Date(filters.endDate as string) }),
+              ...(isValidDate(filters.endDate) && { $lte: new Date(new Date(filters.endDate as string).setHours(23, 59, 59, 999)) }),
             },
           }
         : {};
@@ -246,7 +246,7 @@ class ReportService {
         ? {
             date: {
               ...(isValidDate(filters.startDate) && { $gte: new Date(filters.startDate as string) }),
-              ...(isValidDate(filters.endDate) && { $lte: new Date(filters.endDate as string) }),
+              ...(isValidDate(filters.endDate) && { $lte: new Date(new Date(filters.endDate as string).setHours(23, 59, 59, 999)) }),
             },
           }
         : {};
