@@ -2,3 +2,6 @@ node_modules
 package-lock.json
 .env
 dist
+package.json
+tsconfig.json
+src/app.ts

@@ -5,3 +5,4 @@ dist/
 db.env
 npm-debug.log*
 .DS_Store
+frontEnd/assets/js/api.js
