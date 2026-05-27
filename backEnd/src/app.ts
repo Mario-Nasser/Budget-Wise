@@ -64,7 +64,7 @@ app.use('/budgets', budgetRoutes);
 app.use('/auth', authRoutes);
 
 app.get('/', (req, res) => {
-  res.json({ message: 'BudgetWise API is running ✅' });
+  res.sendFile(path.join(__dirname, '../../frontEnd/index.html'));
 });
 
 // Server
