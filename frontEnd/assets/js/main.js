@@ -1,10 +1,10 @@
 // Mobile Navigation Toggle
 document.getElementById('nav-toggle').addEventListener('click', function() {
     const navOnMobile = document.getElementById('navOnMobile');
-    navOnMobile.style.right ='0';
+    navOnMobile.style.transform = 'translateX(0)';
 });
 
 document.getElementById('nav-close').addEventListener('click', function() {
     const navOnMobile = document.getElementById('navOnMobile');
-    navOnMobile.style.right = '-229px';
+    navOnMobile.style.transform = 'translateX(100%)';
 });
