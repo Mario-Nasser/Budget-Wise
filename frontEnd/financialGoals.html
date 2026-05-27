@@ -3,21 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Budget-Wise | Budgets</title>
+  <title>Budget-Wise | Financial Goals</title>
   <link rel="icon" type="image/png" href="./assets/images/logo.jpeg">
   <link rel="stylesheet" href="assets/css/main.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/budgets.css">
+  <link rel="stylesheet" href="assets/css/financialGoals.css">
 </head>
 <body>
   <nav>
     <div class="nav-brand">Budget-Wise</div>
     <ul class="nav-links">
-      <li><a href="financialGoals.html">Financial Goals</a></li>
+      <li><a href="financialGoals.html" class="active">Financial Goals</a></li>
       <li><a href="addTransaction.html">Transactions</a></li>
-      <li><a href="budgets.html" class="active">Budgets</a></li>
+      <li><a href="budgets.html">Budgets</a></li>
       <li><a href="report.html">Reports</a></li>
     </ul>
     <div id="nav-user-info" style="display: flex; gap: 1rem; align-items: center;">
@@ -28,9 +28,9 @@
     <div id="navOnMobile">
       <div id="nav-close" style="text-align: right; margin-bottom: 1rem;">X</div>
       <ul id="linksOnMobile">
-        <li><a href="financialGoals.html">Financial Goals</a></li>
+        <li><a href="financialGoals.html" class="active">Financial Goals</a></li>
         <li><a href="addTransaction.html">Transactions</a></li>
-        <li><a href="budgets.html" class="active">Budgets</a></li>
+        <li><a href="budgets.html">Budgets</a></li>
         <li><a href="report.html">Reports</a></li>
       </ul>
       <div class="mobile-user-info">
@@ -42,53 +42,42 @@
 
   <div class="container">
     <div class="grid grid-2">
+      <!-- Create Goal -->
       <div class="glass-card animate-fade-in" style="padding: 2rem; height: fit-content;">
-        <h2 id="formTitle">Create Budget</h2>
+        <h2 style="margin-bottom: 1.5rem;">Create New Goal</h2>
         <div id="alert" class="alert"></div>
-        <form id="budgetForm">
-          <input type="hidden" id="budgetId">
+        <form id="goalForm">
           <div class="form-group">
-            <label for="category">Category</label>
-            <select id="category" required></select>
-          </div>
-          <div class="form-group">
-            <label for="amount">Budget Amount ($)</label>
-            <input type="number" id="amount" step="0.01" placeholder="300.00" required>
+            <label for="name">Goal Name</label>
+            <input type="text" id="name" placeholder="e.g. New Car" required>
           </div>
           <div class="form-group">
-            <label for="startDate">Start Date</label>
-            <input type="date" id="startDate" required>
+            <label for="target">Target Amount ($)</label>
+            <input type="number" id="target" placeholder="5000" required>
           </div>
           <div class="form-group">
-            <label for="endDate">End Date</label>
-            <input type="date" id="endDate" required>
+            <label for="deadline">Deadline</label>
+            <input type="date" id="deadline" required>
           </div>
-          <div class="form-group">
-            <label for="alertThreshold">Alert Threshold (%)</label>
-            <input type="number" id="alertThreshold" min="1" max="100" value="100" required>
-          </div>
-          <div style="display: flex; gap: 0.75rem;">
-            <button type="submit" class="btn btn-primary" style="flex: 1;">Save Budget</button>
-            <button type="button" onclick="resetForm()" class="btn" style="background: #e5e7eb; color: var(--text);">Cancel</button>
-          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%;">Create Goal</button>
         </form>
       </div>
 
+      <!-- Goals List -->
       <div class="animate-fade-in" style="animation-delay: 0.1s;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-          <h2>Your Budgets</h2>
-          <button onclick="loadBudgets()" class="btn" style="background: rgba(255,255,255,0.05); color: var(--text);">Refresh</button>
+          <h2>Your Goals</h2>
+          <button onclick="loadGoals()" class="btn" style="background: rgba(255,255,255,0.05); color: var(--text);">Refresh</button>
         </div>
-        <div id="budgetAlerts"></div>
-        <div id="budgetList">
-          <p style="color: var(--text-muted);">Loading budgets...</p>
+        <div id="goalsList">
+          <p style="color: var(--text-muted);">Loading your goals...</p>
         </div>
       </div>
     </div>
   </div>
 
   <script src="assets/js/api.js"></script>
-  <script src="./assets/js/budgets.js"></script>
+  <script src="./assets/js/financialGoals.js"></script> 
   <script src="assets/js/main.js"></script>
 </body>
 </html>

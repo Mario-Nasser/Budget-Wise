@@ -1,83 +1,94 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Budget-Wise | Financial Goals</title>
-  <link rel="icon" type="image/png" href="./assets/images/logo.jpeg">
-  <link rel="stylesheet" href="assets/css/main.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/financialGoals.css">
-</head>
-<body>
-  <nav>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Budget-Wise | Smart Financial Management</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" type="image/png" href="./assets/images/logo.jpeg" />
+    <link rel="stylesheet" href="assets/css/main.css" />
+    <link rel="stylesheet" href="assets/css/home.css" />
+  </head>
+  <body>
+      
+      <!-- NAVBAR - WHITE WITH GREEN ACCENTS -->
+    <!-- <nav>
     <div class="nav-brand">Budget-Wise</div>
-    <ul class="nav-links">
-      <li><a href="index.html" class="active">Financial Goals</a></li>
-      <li><a href="addTransaction.html">Transactions</a></li>
-      <li><a href="budgets.html">Budgets</a></li>
-      <li><a href="report.html">Reports</a></li>
-    </ul>
-    <div id="nav-user-info" style="display: flex; gap: 1rem; align-items: center;">
-      <span id="nav-user-name" style="color: var(--text-muted); font-size: 0.875rem;"></span>
-      <button onclick="handleLogout()" class="btn btn-primary" style="padding: 0.5rem 1rem;">Logout</button>
+
+    <div style="display: flex; gap: 1rem; align-items: center;">
+      <a href="login.html" style="text-decoration: none;">
+        <button class="btn btn-primary" style="padding: 0.5rem 1rem;">Sign in</button>
+      </a>
     </div>
-    <div id="nav-toggle">☰</div>
-    <div id="navOnMobile">
-      <div id="nav-close" style="text-align: right; margin-bottom: 1rem;">X</div>
-      <ul id="linksOnMobile">
-        <li><a href="index.html" class="active">Financial Goals</a></li>
-        <li><a href="addTransaction.html">Transactions</a></li>
-        <li><a href="budgets.html">Budgets</a></li>
-        <li><a href="report.html">Reports</a></li>
-      </ul>
-      <div class="mobile-user-info">
-        <span id="nav-user-name" style="color: var(--text-muted); font-size: 0.875rem;"></span>
-        <button onclick="handleLogout()" class="btn btn-primary">Logout</button>
-      </div>
-    </div>  
-  </nav>
+    </nav> -->
 
-  <div class="container">
-    <div class="grid grid-2">
-      <!-- Create Goal -->
-      <div class="glass-card animate-fade-in" style="padding: 2rem; height: fit-content;">
-        <h2 style="margin-bottom: 1.5rem;">Create New Goal</h2>
-        <div id="alert" class="alert"></div>
-        <form id="goalForm">
-          <div class="form-group">
-            <label for="name">Goal Name</label>
-            <input type="text" id="name" placeholder="e.g. New Car" required>
-          </div>
-          <div class="form-group">
-            <label for="target">Target Amount ($)</label>
-            <input type="number" id="target" placeholder="5000" required>
-          </div>
-          <div class="form-group">
-            <label for="deadline">Deadline</label>
-            <input type="date" id="deadline" required>
-          </div>
-          <button type="submit" class="btn btn-primary" style="width: 100%;">Create Goal</button>
-        </form>
-      </div>
+    <nav class="navbar">
+        <a href="#" class="navbar-brand">
+            <span class="budget">Budget</span>
+            <span class="wise">Wise</span>
+        </a>
+        
+        <ul class="nav-links" id="navLinks">
+            <li><a href="#" class="active">Home</a></li>
+            <li><a href="./login.html">Sign In</a></li>
+            <li><a href="./register.html" class="nav-cta">Get Started</a></li>
+        </ul>
 
-      <!-- Goals List -->
-      <div class="animate-fade-in" style="animation-delay: 0.1s;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-          <h2>Your Goals</h2>
-          <button onclick="loadGoals()" class="btn" style="background: rgba(255,255,255,0.05); color: var(--text);">Refresh</button>
+        <div class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+            <span></span>
+            <span></span>
+            <span></span>
         </div>
-        <div id="goalsList">
-          <p style="color: var(--text-muted);">Loading your goals...</p>
+    </nav>
+
+    <!-- Interactive Mouse Trail Container -->
+    <div class="cursor-trail" id="cursorTrail"></div>
+
+
+    <!-- MAIN HERO SECTION - SPLIT LAYOUT -->
+    <main class="hero">
+      <div class="hero-container">
+        <!-- LEFT SIDE: Text Content -->
+        <div class="content-wrapper">
+          <div class="badge">✨ Smart Savings Made Easy</div>
+          <h1>Take Control of Your Money with <span>Budget-Wise</span></h1>
+          <p>
+            Your all-in-one financial companion — track expenses, set budgets,
+            hit savings goals, and get real-time insights to manage your
+            finances smarter.
+          </p>
+          <a href="./register.html" class="cta-button">Get Started</a>
+        </div>
+
+        <!-- RIGHT SIDE: Full Size Mascot Image -->
+        <div class="visual-wrapper">
+          <div class="glow-orb"></div>
+          <!-- REPLACE 'mascot.png' WITH YOUR ACTUAL IMAGE FILENAME -->
+          <img
+            src="./assets/images/mascot.png"
+            alt="Budget-Wise Financial Mascot"
+            class="mascot-img"
+          />
         </div>
       </div>
-    </div>
-  </div>
+    </main>
 
-  <script src="assets/js/api.js"></script>
-  <script src="./assets/js/financialGoals.js"></script> 
-  <script src="assets/js/main.js"></script>
-</body>
+    <!-- FOOTER - LIKE FIRST IMAGE -->
+    <footer class="footer">
+      <p class="footer-text">
+        © 2024 Budget-Wise. All rights reserved. | Made with
+        <span class="heart">💚</span> for smarter finances
+      </p>
+    </footer>
+
+    <!-- JavaScript for Interactive Effects & Mobile Menu -->
+    <script src="./assets/js/home.js"></script>
+  </body>
 </html>

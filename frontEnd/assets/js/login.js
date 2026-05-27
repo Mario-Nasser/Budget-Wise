@@ -20,7 +20,7 @@ document.getElementById("loginForm").onsubmit = async (e) => {
     alertEl.className = "alert alert-success";
     alertEl.style.display = "block";
 
-    setTimeout(() => (window.location.href = "index.html"), 1000);
+    setTimeout(() => (window.location.href = "financialGoals.html"), 1000);
   } catch (err) {
     alertEl.textContent = err.message || "Invalid email or password";
     alertEl.className = "alert alert-error";
