@@ -144,15 +144,16 @@ ul{
 }
 
 .mobile-user-info {
-  display: flex; 
-  gap: 1rem; 
+  display: flex;
   width: 100%;
   align-items: center; 
   justify-content: center;
 }
 
 .mobile-user-info button{
-  width: 90%;
+  width: 100%;
+  padding: 0.6rem 1rem;
+  font-size: 15px;
 }
 
 /* Forms */
