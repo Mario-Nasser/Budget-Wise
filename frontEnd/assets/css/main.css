@@ -111,9 +111,10 @@ ul{
   width: 200px;
   height: 100vh;
 }
+
 #nav-close{
   cursor: pointer;
-  font-size: 18px;
+  font-size: 23px;
 }
 
 #linksOnMobile{
