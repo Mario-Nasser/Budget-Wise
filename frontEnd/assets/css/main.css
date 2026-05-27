@@ -17,13 +17,16 @@
   box-sizing: border-box;
 }
 
+html, body {
+  overflow-x: hidden;
+}
+
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   background-color: var(--bg);
   color: var(--text);
   min-height: 100vh;
   line-height: 1.5;
-  overflow-x: hidden;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -42,6 +45,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Navigation */
 nav {
+  overflow-x: hidden;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -95,7 +99,7 @@ ul{
 }
 
 #navOnMobile{
-  position: absolute;
+  position: fixed;
   top: 0px;
   right: 0;
   transform: translateX(100%);
@@ -111,6 +115,7 @@ ul{
   align-items: right;
   gap: 1rem;
   width: 200px;
+  max-width: 80vw; /* prevents overflow on very small screens */
   height: 100vh;
 }
 
@@ -131,7 +136,7 @@ ul{
 
 #linksOnMobile li{
   width: 100%;
-  text-align: right;
+  text-align:end;
 }
 #linksOnMobile li a{
   display: block;
