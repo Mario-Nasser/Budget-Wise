@@ -876,6 +876,12 @@ body {
   padding-left: 4px;
   box-shadow: 0 4px 18px rgba(76,175,80,0.4);
   animation: pulseBounce 2s ease-in-out infinite;
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out, background 0.3s ease-in-out, color 0.3s ease-in-out;
+}
+.tutorial-play-icon:hover {
+  color: white !important;
+  transform: scale(1.08) !important;
+  box-shadow: 0 6px 26px rgba(76,175,80,0.55) !important;
 }
 
 @keyframes pulseBounce {
