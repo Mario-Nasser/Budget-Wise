@@ -122,13 +122,36 @@ ul{
   gap: 1rem; 
   justify-content: center; 
   align-items: center;
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+#linksOnMobile li{
+  width: 100%;
+  text-align: right;
+}
+#linksOnMobile li a{
+  display: block;
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: 0.3s ease-in-out;
+}
+
+#linksOnMobile li a:hover{
+  background: rgba(102, 102, 102, 0.1);
 }
 
 .mobile-user-info {
   display: flex; 
   gap: 1rem; 
+  width: 100%;
   align-items: center; 
   justify-content: center;
+}
+
+.mobile-user-info button{
+  width: 90%;
 }
 
 /* Forms */
