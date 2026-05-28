@@ -864,6 +864,7 @@ body {
 }
 
 .tutorial-play-icon {
+  text-decoration: none;
   width: 64px;
   height: 64px;
   background: var(--primary-green);
