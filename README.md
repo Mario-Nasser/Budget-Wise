@@ -168,6 +168,8 @@ This project was backed by comprehensive software engineering documentation:
 - 🏛️ **3-Tier Architecture Diagram** — Presentation, Application, and Data tier components
 - 📋 **Software Design Specification (SDS)** — Full HLD documentation
 
+🔗 **View all software design artifacts:** [Documentation](https://drive.google.com/drive/folders/12UdbQdpYUvn4CYsKlXoDCxYD3pRE-QyY?usp=drive_link)
+
 ---
 
 ## 👥 Team
