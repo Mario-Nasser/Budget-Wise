@@ -10,7 +10,8 @@ const FinancialGoalSchema = new mongoose.Schema({
   goalName: String,
   targetAmount: Number,
   currentAmount: { type: Number, default: 0 },
-  deadline: Date
+  deadline: Date,
+  goalIcon : String,
 });
 
 export default mongoose.model('FinancialGoal', FinancialGoalSchema);

@@ -211,11 +211,19 @@ select option {
   transition: all 0.3s;
   border: none;
   gap: 0.5rem;
+  background-color: #dddddd;
+  transition: 0.3s ease-in-out;
+}
+
+.btn:hover{
+  transform: translateY(-1px);
+  background-color: #cccccc
 }
 
 .btn-primary {
-  background: var(--primary);
+  background: var(--primary) !important;
   color: white;
+  transition: background 0.3s ease-in-out, transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
 .btn-primary:hover {
@@ -287,4 +295,10 @@ select option {
   background: #ecfdf5;
   color: #065f46;
   font-weight: 600;
+}
+
+.error{
+  color: var(--error);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
 }

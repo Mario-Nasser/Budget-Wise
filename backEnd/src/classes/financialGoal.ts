@@ -5,6 +5,7 @@ export interface GoalData {
   targetAmount: number;
   currentAmount: number;
   deadline: Date | string;
+  goalIcon: string;
 }
 
 export class FinancialGoal {
@@ -37,8 +38,13 @@ export class FinancialGoal {
     return this.goalData.deadline;
   }
 
+  get goalIcon() {
+    return this.goalData.goalIcon;
+  }
+
   updateProgress(amount: number) {
     if (amount <= 0) throw new Error("Amount must be positive");
+    if(amount > this.targetAmount) {amount = this.targetAmount;}
     this.goalData.currentAmount += amount;
   }
 
@@ -59,6 +65,7 @@ export class FinancialGoal {
       targetAmount: this.targetAmount,
       currentAmount: this.currentAmount,
       deadline: this.deadline,
+      goalIcon: this.goalIcon,
     };
   }
 

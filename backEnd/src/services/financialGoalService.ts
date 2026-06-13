@@ -1,12 +1,15 @@
 import { FinancialGoal, GoalData } from "../classes/financialGoal";
 import FinancialGoalModel from "../models/financialGoalModel";
 import { v4 as uuidv4 } from "uuid";
+import { AIIconService } from "./goalIconService";
 
 class FinancialGoalService {
   static async createGoal(data: any) {
+    const goalIcon : string = await AIIconService.generateIconName(data.goalName);
     const goal = new FinancialGoal({
       goalId: uuidv4(),
       ...data,
+      goalIcon,
     });
 
     const saved = await FinancialGoalModel.create(goal.getData());
