@@ -134,8 +134,11 @@ document.getElementById("goalForm").onsubmit = async (e) => {
     hasError = true;
   }
 
-  if (!target || isNaN(target) || Number(target) <= 0) {
-    targetError.textContent = "Please enter a valid target amount.";
+  if (!target) {
+    targetError.textContent = "Target amount is required.";
+    hasError = true;
+  }else if(Number(target) <= 0){
+    targetError.textContent = "Target amount must be posative number";
     hasError = true;
   }
 
