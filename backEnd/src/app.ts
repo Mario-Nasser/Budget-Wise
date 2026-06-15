@@ -46,7 +46,7 @@ app.use(cors({
 }));
 
 // 2. CRITICAL FOR VERCEL: Explicitly intercept and approve all preflight OPTIONS requests
-app.options('*', cors());
+app.options(/.*/, cors());
 
 app.use(express.json());
 app.use(cookieParser());
