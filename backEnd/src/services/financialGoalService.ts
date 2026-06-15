@@ -7,7 +7,7 @@ class FinancialGoalService {
   static async createGoal(data: any) {
     const goalIcon : string = await AIIconService.generateIconName(data.goalName);
     const goal = new FinancialGoal({
-      goalId: uuidv4(),
+      goalId: crypto.randomUUID(),
       ...data,
       goalIcon,
     });
