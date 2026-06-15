@@ -1,6 +1,6 @@
 import { FinancialGoal, GoalData } from "../classes/financialGoal";
 import FinancialGoalModel from "../models/financialGoalModel";
-import { v4 as uuidv4 } from "uuid";
+const crypto = require('crypto');
 import { AIIconService } from "./goalIconService";
 
 class FinancialGoalService {
