@@ -31,22 +31,44 @@ import budgetRoutes from './routes/budgetRoutes';
 
 export const app: Application = express();
 
-// 1. FIXED CORS CONFIGURATION
-const allowedOrigins = [
-  'http://localhost:3000',
-  'https://budgetwise-fcai.netlify.app',
-  'https://6a0d10b7af7de0756046f4bc--cozy-banoffee-0b3650.netlify.app', // Added https:// prefix
-];
-
 app.use(cors({
-  origin: allowedOrigins,
+  origin: (origin, callback) => {
+    const allowed = [
+      'http://localhost:3000',
+      'https://budgetwise-fcai.netlify.app',
+      'https://budget-wisefcai.vercel.app',
+    ];
+    // Allow any Vercel preview deploy for your project
+    if (!origin || allowed.includes(origin) || origin.endsWith('.vercel.app')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
 }));
 
-// 2. CRITICAL FOR VERCEL: Explicitly intercept and approve all preflight OPTIONS requests
-app.options(/.*/, cors());
+const corsOptions = {
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    if (!origin || origin.endsWith('.vercel.app') || [
+      'http://localhost:3000',
+      'https://budgetwise-fcai.netlify.app',
+      'https://budget-wisefcai.vercel.app',
+    ].includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+};
+
+app.use(cors(corsOptions));
+app.options(/.*/, cors(corsOptions)); // ← same config, not a blank cors()
 
 app.use(express.json());
 app.use(cookieParser());
