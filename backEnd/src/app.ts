@@ -69,7 +69,16 @@ app.get('/', (req, res) => {
 
 // Server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`MONGO_URI loaded: ${process.env.MONGO_URI ? 'YES ✅' : 'NO ❌'}`);
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server running locally on port ${PORT}`);
+  });
+}
+
+// 2. The critical fix Vercel needs:
+export default app;
+
+// Safely ensure the function is directly exposed if compiled to CommonJS
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = app;
+}
