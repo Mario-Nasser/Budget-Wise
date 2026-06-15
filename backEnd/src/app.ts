@@ -35,7 +35,7 @@ export const app: Application = express();
 const allowedOrigins = [
   'http://localhost:3000',
   'https://budgetwise-fcai.netlify.app',
-  'https://6a0d10b7af7de0756046f4bc--cozy-banoffee-0b3650.netlify.app', // Added https:// prefix
+  'https://budget-wisefcai.vercel.app', // Added https:// prefix
 ];
 
 app.use(cors({
