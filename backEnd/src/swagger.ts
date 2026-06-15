@@ -1,19 +1,10 @@
-import swaggerJsDoc from "swagger-jsdoc";
+import path from 'path';
 
 const swaggerOptions = {
   definition: {
     openapi: "3.0.0",
-    info: {
-      title: "Financial Report API",
-      version: "1.0.0",
-    },
-    servers: [
-      {
-        url: "http://localhost:3000",
-      },
-    ],
+    info: { title: "Financial Report API", version: "1.0.0" },
+    servers: [{ url: "https://your-vercel-url.vercel.app" }],
   },
-  apis: ["./src/routes/*.ts"],
+  apis: [path.join(__dirname, './routes/*.js')],  // .js for compiled output
 };
-
-export default swaggerJsDoc(swaggerOptions);
