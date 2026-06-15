@@ -31,15 +31,22 @@ import budgetRoutes from './routes/budgetRoutes';
 
 export const app: Application = express();
 
-// CORS — allow localhost dev + Netlify production
+// 1. FIXED CORS CONFIGURATION
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://budgetwise-fcai.netlify.app',
+  'https://6a0d10b7af7de0756046f4bc--cozy-banoffee-0b3650.netlify.app', // Added https:// prefix
+];
+
 app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'https://budgetwise-fcai.netlify.app',
-    '6a0d10b7af7de0756046f4bc--cozy-banoffee-0b3650.netlify.app',
-  ],
+  origin: allowedOrigins,
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
 }));
+
+// 2. CRITICAL FOR VERCEL: Explicitly intercept and approve all preflight OPTIONS requests
+app.options('*', cors());
 
 app.use(express.json());
 app.use(cookieParser());
@@ -64,7 +71,7 @@ app.use('/budgets', budgetRoutes);
 app.use('/auth', authRoutes);
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../frontEnd/index.html'));
+  res.send('BudgetWise API Backend running successfully on Vercel.');
 });
 
 // Server
@@ -75,7 +82,7 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-// 2. The critical fix Vercel needs:
+// The critical fix Vercel needs:
 export default app;
 
 // Safely ensure the function is directly exposed if compiled to CommonJS
