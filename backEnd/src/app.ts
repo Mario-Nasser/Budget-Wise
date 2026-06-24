@@ -21,7 +21,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import connectDB from './config/db';
 import swaggerUi from 'swagger-ui-express';
-import swaggerDocs from './swagger';
+import { swaggerDocs } from './swagger';
 import goalRoutes from './routes/financialGoalRoutes';
 import reportRoutes from './routes/reportRoutes';
 import morgan from 'morgan';
