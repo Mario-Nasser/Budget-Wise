@@ -1,12 +1,11 @@
 import dotenv from 'dotenv';
 import path from 'path';
 
-// Try multiple paths so it works both locally and on Leapcell
 const envPaths = [
-  path.join(__dirname, '.env'),           // backEnd/src/.env  (local)
-  path.join(__dirname, '..', '.env'),     // backEnd/.env
-  path.join(process.cwd(), 'backEnd', 'src', '.env'), // from root
-  path.join(process.cwd(), '.env'),       // root .env
+  path.join(__dirname, '.env'),
+  path.join(__dirname, '..', '.env'),
+  path.join(process.cwd(), 'backEnd', 'src', '.env'),
+  path.join(process.cwd(), '.env'),
 ];
 for (const envPath of envPaths) {
   const result = dotenv.config({ path: envPath });
@@ -32,27 +31,9 @@ import aiRoutes from './routes/aiRoutes';
 
 export const app: Application = express();
 
-app.use(cors({
+// ✅ ONE cors config only
+const corsOptions: cors.CorsOptions = {
   origin: (origin, callback) => {
-    const allowed = [
-      'http://localhost:3000',
-      'https://budgetwise-fcai.netlify.app',
-      'https://budget-wisefcai.vercel.app',
-    ];
-    // Allow any Vercel preview deploy for your project
-    if (!origin || allowed.includes(origin) || origin.endsWith('.vercel.app')) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
-}));
-
-const corsOptions = {
-  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
     const allowed = [
       'http://localhost:3000',
       'https://budgetwise-fcai.netlify.app',
@@ -69,7 +50,7 @@ const corsOptions = {
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
 };
 
-// ✅ Preflight FIRST, then general CORS — order matters
+// ✅ Preflight BEFORE everything else
 app.options('*', cors(corsOptions));
 app.use(cors(corsOptions));
 
@@ -77,18 +58,14 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(morgan(':method :url :status :response-time ms'));
 
-// DB
 connectDB();
 
-// Leapcell Health Checks
 app.get(['/kaithhealthcheck', '/kaithheathcheck'], (req, res) => {
   res.status(200).send('OK');
 });
 
-// Swagger
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-// Routes
 app.use('/goals', goalRoutes);
 app.use('/reports', reportRoutes);
 app.use('/transactions', transactionRoutes);
@@ -100,18 +77,9 @@ app.get('/', (req, res) => {
   res.send('BudgetWise API Backend running successfully on Vercel.');
 });
 
-// Server
 const PORT = process.env.PORT || 3000;
 if (process.env.NODE_ENV !== 'production') {
-  app.listen(PORT, () => {
-    console.log(`Server running locally on port ${PORT}`);
-  });
+  app.listen(PORT, () => console.log(`Server running locally on port ${PORT}`));
 }
 
-// The critical fix Vercel needs:
 export default app;
-
-// Safely ensure the function is directly exposed if compiled to CommonJS
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = app;
-}
