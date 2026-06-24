@@ -53,11 +53,12 @@ app.use(cors({
 
 const corsOptions = {
   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-    if (!origin || origin.endsWith('.vercel.app') || [
+    const allowed = [
       'http://localhost:3000',
       'https://budgetwise-fcai.netlify.app',
       'https://budget-wisefcai.vercel.app',
-    ].includes(origin)) {
+    ];
+    if (!origin || allowed.includes(origin) || origin.endsWith('.vercel.app')) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
@@ -68,8 +69,9 @@ const corsOptions = {
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
 };
 
+// ✅ Preflight FIRST, then general CORS — order matters
+app.options('*', cors(corsOptions));
 app.use(cors(corsOptions));
-app.options(/.*/, cors(corsOptions)); // ← same config, not a blank cors()
 
 app.use(express.json());
 app.use(cookieParser());
