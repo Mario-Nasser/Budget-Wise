@@ -1,4 +1,4 @@
-const API_URL = "https://your-backend-name.vercel.app";
+const API_BASE = "https://your-backend-name.vercel.app";
 
 async function request(endpoint, options = {}) {
   const token = localStorage.getItem("token");
