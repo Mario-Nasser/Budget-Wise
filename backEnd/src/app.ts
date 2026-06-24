@@ -28,6 +28,7 @@ import morgan from 'morgan';
 import authRoutes from './routes/authRoutes';
 import transactionRoutes from './routes/transactionRoutes';
 import budgetRoutes from './routes/budgetRoutes';
+import aiRoutes from './routes/aiRoutes';
 
 export const app: Application = express();
 
@@ -91,6 +92,7 @@ app.use('/reports', reportRoutes);
 app.use('/transactions', transactionRoutes);
 app.use('/budgets', budgetRoutes);
 app.use('/auth', authRoutes);
+app.use('/ai', aiRoutes);
 
 app.get('/', (req, res) => {
   res.send('BudgetWise API Backend running successfully on Vercel.');

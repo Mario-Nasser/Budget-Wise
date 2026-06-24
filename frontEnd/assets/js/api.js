@@ -66,6 +66,9 @@ const api = {
   },
   reports: {
     get: (params) => request(`/reports?${new URLSearchParams(params)}`),
+  },
+  ai: {
+    chat: (data) => request("/ai/chat", { method: "POST", body: JSON.stringify(data) }),
   }
 };
 
