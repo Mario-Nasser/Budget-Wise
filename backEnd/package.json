@@ -2,31 +2,21 @@
   "name": "budget-wise",
   "version": "1.0.0",
   "description": "SWE assignment",
-  "keywords": [
-    "fintech"
-  ],
-  "homepage": "https://github.com/yasmin-mohamed5/Budget-Wise#readme",
-  "bugs": {
-    "url": "https://github.com/yasmin-mohamed5/Budget-Wise/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/yasmin-mohamed5/Budget-Wise.git"
-  },
   "license": "ISC",
   "author": "yasmin",
   "type": "commonjs",
   "main": "dist/src/app.js",
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
     "dev": "ts-node src/app.ts",
     "build": "tsc",
     "start": "node dist/src/app.js"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.24.1"
-    "@types/cookie-parser": "^1.4.10",
+    "@google/generative-ai": "^0.24.1",
     "bcryptjs": "^3.0.3",
-    "chart.js": "^4.5.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
@@ -42,6 +32,7 @@
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
+    "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
