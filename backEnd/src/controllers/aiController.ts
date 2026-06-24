@@ -15,7 +15,11 @@ class AIController {
       }
 
       // Extract details matching your schema definitions
-      const { totalIncome, totalExpenses, netBalance, expenseByCategory, goals } = financialData;
+      const { totalIncome, totalExpenses, netBalance, expenseByCategory, goals, budgets } = financialData;
+
+      // Calculate derived financial metrics
+      const savingsRate = totalIncome > 0 ? (((totalIncome - totalExpenses) / totalIncome) * 100).toFixed(1) : "0";
+      const expenseToIncomeRatio = totalIncome > 0 ? ((totalExpenses / totalIncome) * 100).toFixed(1) : "0";
 
       // Construct a highly detailed system instruction so the AI understands its boundaries
       const systemInstruction = `
@@ -26,9 +30,14 @@ class AIController {
         - Monthly Income: $${totalIncome || 0}
         - Monthly Expenses: $${totalExpenses || 0}
         - Current Net Balance: $${netBalance || 0}
+        - Savings Rate: ${savingsRate}%
+        - Expense-to-Income Ratio: ${expenseToIncomeRatio}%
         
         Breakdown of Expenses by Category:
         ${expenseByCategory ? JSON.stringify(expenseByCategory, null, 2) : "No categorical data logged yet."}
+
+        Budget Limits & Spending:
+        ${budgets && budgets.length > 0 ? JSON.stringify(budgets, null, 2) : "No budgets set yet."}
 
         Active Financial Goals:
         ${goals && goals.length > 0 ? JSON.stringify(goals, null, 2) : "No active goals set yet."}
@@ -39,6 +48,17 @@ class AIController {
         3. Keep calculations mathematically precise. Use budgeting rules like 50/30/20 where applicable to guide them.
         4. Provide scannable formatting using clean bullet points and markdown bold text. Keep answers clear and digestible.
         5. If they have an active financial goal, prioritize giving strategies to reach it faster based on their current net balance.
+        6. If they have budget limits set, alert them if any category is close to or over the limit.
+        7. Cover a wide range of personal finance topics when asked, including:
+           - Emergency fund planning (recommend 3-6 months of expenses)
+           - Debt payoff strategies (avalanche vs snowball methods)
+           - Basic investment concepts (compound interest, diversification)
+           - Tax-saving tips and deductions
+           - Smart shopping and expense reduction tactics
+           - Income diversification ideas
+        8. When the user has no financial data yet, still provide helpful general financial advice and encourage them to start tracking their expenses in BudgetWise.
+        9. Keep responses concise but actionable - prefer 3-5 bullet points over long paragraphs.
+        10. Always end with a specific, actionable next step the user can take.
       `;
 
       // Set up the model using high-accuracy gemini-2.5-flash
