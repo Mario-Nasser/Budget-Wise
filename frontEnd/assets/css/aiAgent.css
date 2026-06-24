@@ -89,14 +89,37 @@
   gap: 12px;
 }
 
+.ai-chat-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ai-chat-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ai-chat-messages::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+.ai-chat-messages::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
 /* Chat Bubbles */
 .ai-message {
-  max-width: 80%;
+  max-width: 85%;
   padding: 10px 14px;
   border-radius: 12px;
-  font-size: 0.9rem;
-  line-height: 1.4;
+  font-size: 0.875rem;
+  line-height: 1.6;
   word-wrap: break-word;
+  animation: fadeInMsg 0.3s ease-out;
+}
+
+@keyframes fadeInMsg {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .ai-message.user {
@@ -113,6 +136,14 @@
   border-bottom-left-radius: 4px;
 }
 
+.ai-message.bot strong {
+  color: #6ee7b7;
+}
+
+.ai-message.bot em {
+  color: #a5b4fc;
+}
+
 /* Form & Inputs */
 .ai-chat-input-form {
   padding: 1rem;
@@ -122,32 +153,50 @@
   background: rgba(15, 23, 42, 0.4);
 }
 
-.ai-chat-input {
+.ai-chat-widget .ai-chat-input {
   flex-grow: 1;
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.3) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
   border-radius: 8px;
   padding: 8px 12px;
-  color: white;
+  color: #ffffff !important;
+  font-size: 0.9rem;
+  font-family: 'Inter', sans-serif;
   outline: none;
+  width: auto !important;
 }
 
-.ai-chat-input:focus {
-  border-color: #10b981;
+.ai-chat-widget .ai-chat-input::placeholder {
+  color: #94a3b8;
+  opacity: 1;
 }
 
-.ai-chat-send {
+.ai-chat-widget .ai-chat-input:focus {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.15) !important;
+  background: rgba(0, 0, 0, 0.4) !important;
+}
+
+.ai-chat-widget .ai-chat-send {
   background: #10b981;
   color: white;
   border: none;
   padding: 8px 16px;
   border-radius: 8px;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  transition: background 0.2s ease, transform 0.15s ease;
 }
 
-.ai-chat-send:hover {
+.ai-chat-widget .ai-chat-send:hover {
   background: #059669;
+  transform: scale(1.03);
+}
+
+.ai-chat-widget .ai-chat-send:active {
+  transform: scale(0.97);
 }
 
 .ai-typing-indicator {

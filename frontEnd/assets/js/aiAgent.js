@@ -71,9 +71,10 @@ document.addEventListener("DOMContentLoaded", () => {
       };
 
       // Safely run parallel requests using the wrappers from your api.js file
-      const [reportData, goalsData] = await Promise.allSettled([
+      const [reportData, goalsData, budgetData] = await Promise.allSettled([
         api.reports.get(dateParams),
-        api.goals.getAll()
+        api.goals.getAll(),
+        api.budgets.getAll()
       ]);
 
       const context = {
@@ -81,7 +82,8 @@ document.addEventListener("DOMContentLoaded", () => {
         totalExpenses: 0,
         netBalance: 0,
         expenseByCategory: {},
-        goals: []
+        goals: [],
+        budgets: []
       };
 
       if (reportData.status === "fulfilled") {
@@ -100,10 +102,18 @@ document.addEventListener("DOMContentLoaded", () => {
         }));
       }
 
+      if (budgetData.status === "fulfilled" && Array.isArray(budgetData.value)) {
+        context.budgets = budgetData.value.map(b => ({
+          category: b.category || b.categoryName,
+          limit: b.limit || b.budgetLimit,
+          spent: b.spent || b.currentSpent || 0
+        }));
+      }
+
       return context;
     } catch (err) {
       console.warn("Could not completely resolve background balance aggregates:", err);
-      return { totalIncome: 0, totalExpenses: 0, netBalance: 0, expenseByCategory: {}, goals: [] };
+      return { totalIncome: 0, totalExpenses: 0, netBalance: 0, expenseByCategory: {}, goals: [], budgets: [] };
     }
   }
 
@@ -148,8 +158,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     } catch (error) {
       document.getElementById("aiTyping")?.remove();
-      appendMessage("bot", "I am having trouble gathering your financial profile details right now. Please try again shortly.");
       console.error("AI Assistant Exception:", error);
+      
+      // Provide a more helpful fallback message
+      const errorMsg = error?.error || error?.message || "";
+      if (errorMsg.includes("401") || errorMsg.includes("Unauthorized")) {
+        appendMessage("bot", "Your session has expired. Please log out and log back in to continue using the AI advisor.");
+      } else {
+        appendMessage("bot", "I'm sorry, I couldn't connect to the AI service right now. This could be due to a network issue or server maintenance. Please check your connection and try again in a moment.");
+      }
     }
   });
 
@@ -157,12 +174,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const msgBubble = document.createElement("div");
     msgBubble.className = `ai-message ${sender}`;
     
-    // Quick formatting: Replace newlines with breaks and escape markdown bullets cleanly
+    // Enhanced formatting: Support markdown patterns from Gemini responses
     let formattedText = text
       .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") // sanitize string
       .replace(/\n/g, "<br/>")
       .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // bold formatting conversion
-      .replace(/^\s*[\-\*]\s+(.*)$/gm, "• $1"); // bullets conversion
+      .replace(/\*(.*?)\*/g, "<em>$1</em>") // italic formatting
+      .replace(/^\s*[\-\*]\s+(.*)$/gm, "• $1") // bullets conversion
+      .replace(/^\s*(\d+)\.\s+(.*)$/gm, "<strong>$1.</strong> $2") // numbered lists
+      .replace(/`([^`]+)`/g, '<code style="background:rgba(255,255,255,0.1);padding:2px 5px;border-radius:3px;font-size:0.85em;">$1</code>'); // inline code
 
     msgBubble.innerHTML = formattedText;
     messagesContainer.appendChild(msgBubble);
